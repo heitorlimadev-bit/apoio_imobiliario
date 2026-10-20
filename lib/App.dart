@@ -2,6 +2,7 @@ import 'package:apoio_imobiliario/freatures/clinte_info/cliente_info_view.dart';
 import 'package:flutter/material.dart';
 import 'freatures/splash/splash_view.dart';
 import 'freatures/App_theme.dart';
+import 'freatures/clinte_info/cliente_info_model.dart';
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -33,7 +34,7 @@ class App extends StatelessWidget {
                   child: Text('Debug Tela de Detalhes do Cliente'),
                 ),
                                 ElevatedButton(
-                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => SplashView()));},
+                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteInfoPerfil(cliente: cliente)));},
                   child: Text('Debug Tela de Imoveis'),
                 ),
                 //Basta substituir o SplashView() pelo widget que você quer testar
