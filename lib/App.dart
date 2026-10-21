@@ -3,6 +3,7 @@ import 'package:apoio_imobiliario/features/cliente/cliente_view.dart';
 import 'package:apoio_imobiliario/features/splash/splash_view.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_list_view.dart';
 import 'package:apoio_imobiliario/features/cliente/clientes_mock.dart';
+import 'package:apoio_imobiliario/features/login/login_view.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -34,6 +35,9 @@ class App extends StatelessWidget {
                   ),
                   child: const Text('Debug Tela lista de Clientes'),
                 ),
+
+
+
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -67,7 +71,18 @@ class App extends StatelessWidget {
                   },
                   child: const Text('Debug Tela detalhes cliente'),
                 ),
+                ElevatedButton(
+                  onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginView()),
+                  );
+                },
+                child: const Text('Debug Tela de Login do Corretor'),
+                  ),
                 //Basta substituir o SplashView() pelo widget que você quer testar
+
+                
               ],
             );
           },
