@@ -1,4 +1,4 @@
-import 'imovel_tipos_status.dart';
+import 'package:apoio_imobiliario/features/imovel/imovel_tipos_status.dart';
 
 class ImovelModel {
   String id;

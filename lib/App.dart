@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:apoio_imobiliario/freatures/cliente/cliente_view.dart';
-import 'package:apoio_imobiliario/freatures/splash/splash_view.dart';
-import 'package:apoio_imobiliario/freatures/cliente/cliente_list_view.dart';
-import 'package:apoio_imobiliario/freatures/cliente/clientes_mock.dart';
+import 'package:apoio_imobiliario/features/cliente/cliente_view.dart';
+import 'package:apoio_imobiliario/features/splash/splash_view.dart';
+import 'package:apoio_imobiliario/features/cliente/cliente_list_view.dart';
+import 'package:apoio_imobiliario/features/cliente/clientes_mock.dart';
+
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -10,40 +11,68 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     final cores = Theme.of(context).colorScheme;
     return Scaffold(
-    
-        body: Center(
-          child: Builder(builder: (context) {
+      body: Center(
+        child: Builder(
+          builder: (context) {
             return Column(
               children: [
-                AppBar(title: 
-                  Center(child: Text('AppBar'))),
-                Text('Botões debug do app'),
+                AppBar(title: const Center(child: Text('AppBar'))),
+                const Text('Botões debug do app'),
                 ElevatedButton(
-                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteListView()));},
-                  
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ClienteListView(),
+                      ),
+                    );
+                  },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: cores.primary,
                     foregroundColor: cores.onPrimary,
                   ),
-                  child: Text('Debug Tela de Clientes'),
+                  child: const Text('Debug Tela lista de Clientes'),
                 ),
-                                ElevatedButton(
-                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => SplashView()));},
-                  child: Text('Debug Tela de Clientes'),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SplashView(),
+                      ),
+                    );
+                  },
+                  child: const Text('Debug Tela splash (placeholder)'),
                 ),
-                                ElevatedButton(
-                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => SplashView()));},
-                  child: Text('Debug Tela de Detalhes do Cliente'),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SplashView(),
+                      ),
+                    );
+                  },
+                  child: const Text('Debug Tela splash (placeholder)'),
                 ),
-                                ElevatedButton(
-                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteView(cliente: clientes[1])));},
-                  child: Text('Debug Tela de Imoveis'),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ClienteView(cliente: clientes[1]),
+                      ),
+                    );
+                  },
+                  child: const Text('Debug Tela detalhes cliente'),
                 ),
                 //Basta substituir o SplashView() pelo widget que você quer testar
-              ]
+              ],
             );
-          })
-        )
-      );
+          },
+        ),
+      ),
+    );
   }
 }

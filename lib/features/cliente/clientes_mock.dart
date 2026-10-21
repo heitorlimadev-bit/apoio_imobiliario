@@ -1,5 +1,5 @@
-import 'package:apoio_imobiliario/freatures/cliente/cliente_model.dart';
-import 'package:apoio_imobiliario/freatures/cliente/etapa_financialmento.dart';
+import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
+import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
 
 List<ClienteModel> clientes = [
   // Montagem de pasta
@@ -10,7 +10,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991001',
     capitalProprio: 30000,
     cartaCredito: 200000,
-    etapaFinancialmento: EtapaFinancialmento.montagemDePasta,
+    etapaFinanciamento: EtapaFinanciamento.montagemDePasta,
   ),
   ClienteModel(
     id: 2,
@@ -19,7 +19,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991002',
     capitalProprio: 45000,
     cartaCredito: 250000,
-    etapaFinancialmento: EtapaFinancialmento.montagemDePasta,
+    etapaFinanciamento: EtapaFinanciamento.montagemDePasta,
   ),
 
   // Análise de crédito
@@ -30,7 +30,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991003',
     capitalProprio: 25000,
     cartaCredito: 180000,
-    etapaFinancialmento: EtapaFinancialmento.analiseDeCredito,
+    etapaFinanciamento: EtapaFinanciamento.analiseDeCredito,
   ),
   ClienteModel(
     id: 4,
@@ -39,7 +39,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991004',
     capitalProprio: 40000,
     cartaCredito: 220000,
-    etapaFinancialmento: EtapaFinancialmento.analiseDeCredito,
+    etapaFinanciamento: EtapaFinanciamento.analiseDeCredito,
   ),
 
   // Crédito aprovado
@@ -50,7 +50,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991005',
     capitalProprio: 50000,
     cartaCredito: 300000,
-    etapaFinancialmento: EtapaFinancialmento.creditoAprovado,
+    etapaFinanciamento: EtapaFinanciamento.creditoAprovado,
   ),
   ClienteModel(
     id: 6,
@@ -59,7 +59,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991006',
     capitalProprio: 35000,
     cartaCredito: 230000,
-    etapaFinancialmento: EtapaFinancialmento.creditoAprovado,
+    etapaFinanciamento: EtapaFinanciamento.creditoAprovado,
   ),
 
   // Crédito reprovado
@@ -70,7 +70,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991007',
     capitalProprio: 15000,
     cartaCredito: 160000,
-    etapaFinancialmento: EtapaFinancialmento.creditoReprovado,
+    etapaFinanciamento: EtapaFinanciamento.creditoReprovado,
   ),
   ClienteModel(
     id: 8,
@@ -79,7 +79,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991008',
     capitalProprio: 20000,
     cartaCredito: 190000,
-    etapaFinancialmento: EtapaFinancialmento.creditoReprovado,
+    etapaFinanciamento: EtapaFinanciamento.creditoReprovado,
   ),
 
   // Engenharia
@@ -90,7 +90,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991009',
     capitalProprio: 40000,
     cartaCredito: 240000,
-    etapaFinancialmento: EtapaFinancialmento.engenharia,
+    etapaFinanciamento: EtapaFinanciamento.engenharia,
   ),
   ClienteModel(
     id: 10,
@@ -99,7 +99,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991010',
     capitalProprio: 55000,
     cartaCredito: 320000,
-    etapaFinancialmento: EtapaFinancialmento.engenharia,
+    etapaFinanciamento: EtapaFinanciamento.engenharia,
   ),
 
   // Assinatura de contrato
@@ -110,7 +110,7 @@ List<ClienteModel> clientes = [
     telefone: '17999991011',
     capitalProprio: 60000,
     cartaCredito: 350000,
-    etapaFinancialmento: EtapaFinancialmento.assinaturaDeContrato,
+    etapaFinanciamento: EtapaFinanciamento.assinaturaDeContrato,
   ),
   ClienteModel(
     id: 12,
@@ -119,6 +119,6 @@ List<ClienteModel> clientes = [
     telefone: '17999991012',
     capitalProprio: 48000,
     cartaCredito: 280000,
-    etapaFinancialmento: EtapaFinancialmento.assinaturaDeContrato,
+    etapaFinanciamento: EtapaFinanciamento.assinaturaDeContrato,
   ),
 ];
