@@ -1,8 +1,8 @@
-import 'package:apoio_imobiliario/freatures/clinte_info/cliente_info_view.dart';
 import 'package:flutter/material.dart';
-import 'freatures/splash/splash_view.dart';
-import 'freatures/App_theme.dart';
-import 'freatures/clinte_info/cliente_info_model.dart';
+import 'package:apoio_imobiliario/freatures/cliente/cliente_view.dart';
+import 'package:apoio_imobiliario/freatures/splash/splash_view.dart';
+import 'package:apoio_imobiliario/freatures/cliente/cliente_list_view.dart';
+import 'package:apoio_imobiliario/freatures/cliente/clientes_mock.dart';
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -10,6 +10,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     final cores = Theme.of(context).colorScheme;
     return Scaffold(
+    
         body: Center(
           child: Builder(builder: (context) {
             return Column(
@@ -18,12 +19,13 @@ class App extends StatelessWidget {
                   Center(child: Text('AppBar'))),
                 Text('Botões debug do app'),
                 ElevatedButton(
-                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteInfo()));},
-                  child: Text('Debug Tela de Clientes'),
+                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteListView()));},
+                  
                   style: ElevatedButton.styleFrom(
                     backgroundColor: cores.primary,
                     foregroundColor: cores.onPrimary,
                   ),
+                  child: Text('Debug Tela de Clientes'),
                 ),
                                 ElevatedButton(
                   onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => SplashView()));},
@@ -34,7 +36,7 @@ class App extends StatelessWidget {
                   child: Text('Debug Tela de Detalhes do Cliente'),
                 ),
                                 ElevatedButton(
-                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteInfoPerfil(cliente: cliente)));},
+                  onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteView(cliente: clientes[1])));},
                   child: Text('Debug Tela de Imoveis'),
                 ),
                 //Basta substituir o SplashView() pelo widget que você quer testar

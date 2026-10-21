@@ -1,6 +1,6 @@
 import 'imovel_tipos_status.dart';
 
-class ImovelInfoModel {
+class ImovelModel {
   String id;
   String nome;
   String endereco;
@@ -9,7 +9,7 @@ class ImovelInfoModel {
   int valor;
   String descricao;
 
-  ImovelInfoModel({
+  ImovelModel({
     required this.id,
     required this.nome,
     required this.endereco,

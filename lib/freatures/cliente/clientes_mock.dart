@@ -1,29 +1,9 @@
-import 'etapa_financialmento.dart';
+import 'package:apoio_imobiliario/freatures/cliente/cliente_model.dart';
+import 'package:apoio_imobiliario/freatures/cliente/etapa_financialmento.dart';
 
-class ClienteInfo {
-  int id;
-  String nome;
-  String email;
-  String telefone;
-  int capitalProprio;
-  int cartaCredito;
-  EtapaFinancialmento etapaFinancialmento;
-  
-  ClienteInfo({
-    required this.id,
-    required this.nome,
-    required this.email,
-    required this.telefone,
-    required this.capitalProprio,
-    required this.cartaCredito,
-    required this.etapaFinancialmento,
-  });
-}
-
-
-List<ClienteInfo> clientes = [
+List<ClienteModel> clientes = [
   // Montagem de pasta
-  ClienteInfo(
+  ClienteModel(
     id: 1,
     nome: 'Maria Silva',
     email: 'maria@email.com',
@@ -32,7 +12,7 @@ List<ClienteInfo> clientes = [
     cartaCredito: 200000,
     etapaFinancialmento: EtapaFinancialmento.montagemDePasta,
   ),
-  ClienteInfo(
+  ClienteModel(
     id: 2,
     nome: 'João Santos',
     email: 'joao@email.com',
@@ -43,7 +23,7 @@ List<ClienteInfo> clientes = [
   ),
 
   // Análise de crédito
-  ClienteInfo(
+  ClienteModel(
     id: 3,
     nome: 'Ana Oliveira',
     email: 'ana@email.com',
@@ -52,7 +32,7 @@ List<ClienteInfo> clientes = [
     cartaCredito: 180000,
     etapaFinancialmento: EtapaFinancialmento.analiseDeCredito,
   ),
-  ClienteInfo(
+  ClienteModel(
     id: 4,
     nome: 'Pedro Costa',
     email: 'pedro@email.com',
@@ -63,7 +43,7 @@ List<ClienteInfo> clientes = [
   ),
 
   // Crédito aprovado
-  ClienteInfo(
+  ClienteModel(
     id: 5,
     nome: 'Lucas Ferreira',
     email: 'lucas@email.com',
@@ -72,7 +52,7 @@ List<ClienteInfo> clientes = [
     cartaCredito: 300000,
     etapaFinancialmento: EtapaFinancialmento.creditoAprovado,
   ),
-  ClienteInfo(
+  ClienteModel(
     id: 6,
     nome: 'Beatriz Lima',
     email: 'beatriz@email.com',
@@ -83,7 +63,7 @@ List<ClienteInfo> clientes = [
   ),
 
   // Crédito reprovado
-  ClienteInfo(
+  ClienteModel(
     id: 7,
     nome: 'Rafael Almeida',
     email: 'rafael@email.com',
@@ -92,7 +72,7 @@ List<ClienteInfo> clientes = [
     cartaCredito: 160000,
     etapaFinancialmento: EtapaFinancialmento.creditoReprovado,
   ),
-  ClienteInfo(
+  ClienteModel(
     id: 8,
     nome: 'Juliana Rocha',
     email: 'juliana@email.com',
@@ -103,7 +83,7 @@ List<ClienteInfo> clientes = [
   ),
 
   // Engenharia
-  ClienteInfo(
+  ClienteModel(
     id: 9,
     nome: 'Gabriel Martins',
     email: 'gabriel@email.com',
@@ -112,7 +92,7 @@ List<ClienteInfo> clientes = [
     cartaCredito: 240000,
     etapaFinancialmento: EtapaFinancialmento.engenharia,
   ),
-  ClienteInfo(
+  ClienteModel(
     id: 10,
     nome: 'Camila Souza',
     email: 'camila@email.com',
@@ -123,7 +103,7 @@ List<ClienteInfo> clientes = [
   ),
 
   // Assinatura de contrato
-  ClienteInfo(
+  ClienteModel(
     id: 11,
     nome: 'Felipe Ribeiro',
     email: 'felipe@email.com',
@@ -132,7 +112,7 @@ List<ClienteInfo> clientes = [
     cartaCredito: 350000,
     etapaFinancialmento: EtapaFinancialmento.assinaturaDeContrato,
   ),
-  ClienteInfo(
+  ClienteModel(
     id: 12,
     nome: 'Larissa Mendes',
     email: 'larissa@email.com',

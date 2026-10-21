@@ -1,16 +1,15 @@
-
 import 'package:flutter/material.dart';
-import 'package:apoio_imobiliario/freatures/clinte_info/etapa_financialmento.dart';
-import 'cliente_info_model.dart';
+import 'package:apoio_imobiliario/freatures/cliente/etapa_financialmento.dart';
+import 'package:apoio_imobiliario/freatures/cliente/clientes_mock.dart';
 
-class ClienteInfo extends StatefulWidget {
-  const ClienteInfo({super.key});
+class ClienteListView extends StatefulWidget {
+  const ClienteListView({super.key});
 
   @override
-  State<ClienteInfo> createState() => _ClienteInfoState();
+  State<ClienteListView> createState() => _ClienteListViewState();
 }
 
-class _ClienteInfoState extends State<ClienteInfo> {
+class _ClienteListViewState extends State<ClienteListView> {
   EtapaFinancialmento statusAtual =
       EtapaFinancialmento.montagemDePasta;
 
