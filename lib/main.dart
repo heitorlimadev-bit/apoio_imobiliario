@@ -7,4 +7,3 @@ void main() {
 }
 
 // um commit no código novo, felipe 21/10 - teste,git mv lib/App.dart lib/app_tmp.dart
-git mv lib/app_tmp.dart lib/app.dart
