@@ -38,7 +38,6 @@ class _LoginViewState extends State<LoginView> {
               const SizedBox(height: 24),
               TextField(
                 controller: _loginController,
-                style: const TextStyle(),
                 decoration: const InputDecoration(
                   labelText: 'Login',
                   border: OutlineInputBorder(),
@@ -56,8 +55,6 @@ class _LoginViewState extends State<LoginView> {
                 style: const TextStyle(),
                 decoration: const InputDecoration(
                   labelText: 'Senha',
-                  labelStyle: TextStyle(),
-                  border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(borderSide: BorderSide()),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(width: 2),

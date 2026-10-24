@@ -1,3 +1,4 @@
+import 'package:apoio_imobiliario/features/cliente/cliente_view.dart';
 import 'package:flutter/material.dart';
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_controller.dart';
@@ -74,6 +75,10 @@ class _ClienteListViewState extends State<ClienteListView> {
                     leading: const Icon(Icons.face),
                     title: Text(cliente.nome),
                     subtitle: Text(cliente.email),
+                    onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteView(cliente: cliente),
+                    )
+                    );
+                    },
                   ),
                 );
               },
