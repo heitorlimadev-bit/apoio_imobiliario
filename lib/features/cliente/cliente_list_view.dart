@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
-import 'package:apoio_imobiliario/features/cliente/clientes_mock.dart';
+import 'package:apoio_imobiliario/features/cliente/cliente_controller.dart';
 
 class ClienteListView extends StatefulWidget {
   const ClienteListView({super.key});
@@ -20,6 +20,7 @@ class ClienteListView extends StatefulWidget {
 
 
 class _ClienteListViewState extends State<ClienteListView> {
+  final _controller = ClienteController();
   EtapaFinanciamento statusAtual = EtapaFinanciamento.montagemDePasta;
 
   @override
@@ -27,9 +28,8 @@ class _ClienteListViewState extends State<ClienteListView> {
     final cores = Theme.of(context).colorScheme;
 
     // Filtra os clientes pela etapa selecionada.
-    final clientesFiltrados = clientes.where((cliente) {
-      return cliente.etapaFinanciamento == statusAtual;
-    }).toList();
+  
+    final clientesFiltrados = _controller.listarPorEtapa(statusAtual);
 
     return Scaffold(
       appBar: AppBar(

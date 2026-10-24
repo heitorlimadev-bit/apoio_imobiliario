@@ -1,7 +1,7 @@
 import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
 
-List<ClienteModel> clientes = [
+final List<ClienteModel> clientesMock = [
   // Montagem de pasta
   ClienteModel(
     id: 1,

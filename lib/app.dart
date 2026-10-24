@@ -65,7 +65,7 @@ class App extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ClienteView(cliente: clientes[1]),
+                        builder: (context) => ClienteView(cliente: clientesMock[1]),
                       ),
                     );
                   },
