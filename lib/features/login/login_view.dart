@@ -8,10 +8,15 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  final loginController = TextEditingController();
-  final senhaController = TextEditingController();
+  final _loginController = TextEditingController();
+  final _senhaController = TextEditingController();
 
   @override
+  void dispose() {
+    _loginController.dispose();
+    _senhaController.dispose();
+    super.dispose();
+  }
   Widget build(BuildContext context) {
     // Controllers para pegar o que o usuário digita
 
@@ -37,7 +42,7 @@ class _LoginViewState extends State<LoginView> {
 
               // Campo de Login
               TextField(
-                controller: loginController,
+                controller: _loginController,
                 style: const TextStyle(), // texto digitado preto
                 decoration: const InputDecoration(
                   labelText: 'Login',
@@ -55,7 +60,7 @@ class _LoginViewState extends State<LoginView> {
 
               // Campo de Senha
               TextField(
-                controller: senhaController,
+                controller: _senhaController,
                 obscureText: true, // esconde a senha
                 style: const TextStyle(),
                 decoration: const InputDecoration(
