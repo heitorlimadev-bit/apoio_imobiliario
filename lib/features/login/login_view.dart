@@ -17,39 +17,32 @@ class _LoginViewState extends State<LoginView> {
     _senhaController.dispose();
     super.dispose();
   }
+  @override
   Widget build(BuildContext context) {
-    // Controllers para pegar o que o usuário digita
 
     return Scaffold(
-      // Fundo branco sólido
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize:
-                MainAxisSize.min, // deixa a coluna no tamanho do conteúdo
-
+                MainAxisSize.min,
             children: [
-              // Título
               const Text(
                 'Desbloquear o App',
                 style: TextStyle(
                   fontSize: 22,
-                  fontWeight: FontWeight.bold, // fonte preta
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Campo de Login
               TextField(
                 controller: _loginController,
-                style: const TextStyle(), // texto digitado preto
+                style: const TextStyle(),
                 decoration: const InputDecoration(
                   labelText: 'Login',
-
-                  border: OutlineInputBorder(), // borda padrão
+                  border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(
-                    // borda preta
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(width: 2),
@@ -57,16 +50,13 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Campo de Senha
               TextField(
                 controller: _senhaController,
-                obscureText: true, // esconde a senha
+                obscureText: true,
                 style: const TextStyle(),
                 decoration: const InputDecoration(
                   labelText: 'Senha',
                   labelStyle: TextStyle(),
-
                   border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(borderSide: BorderSide()),
                   focusedBorder: OutlineInputBorder(
@@ -75,11 +65,8 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Botão Entrar
               ElevatedButton(
                 onPressed: () {
-                  // Por enquanto só mostra uma mensagem
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('App desbloqueado!')),
                   );
