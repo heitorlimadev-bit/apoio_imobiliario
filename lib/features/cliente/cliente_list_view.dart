@@ -10,27 +10,26 @@ class ClienteListView extends StatefulWidget {
   State<ClienteListView> createState() => _ClienteListViewState();
 }
 
-  IconData _iconeDaEtapa(EtapaFinanciamento etapa) => switch (etapa) {
-    EtapaFinanciamento.montagemDePasta => Icons.folder_open,
-    EtapaFinanciamento.analiseDeCredito => Icons.manage_search,
-    EtapaFinanciamento.creditoAprovado => Icons.check_circle,
-    EtapaFinanciamento.creditoReprovado => Icons.cancel,
-    EtapaFinanciamento.engenharia => Icons.engineering,
-    EtapaFinanciamento.assinaturaDeContrato => Icons.draw,
-  };
-
+IconData _iconeDaEtapa(EtapaFinanciamento etapa) => switch (etapa) {
+  EtapaFinanciamento.montagemDePasta => Icons.folder_open,
+  EtapaFinanciamento.analiseDeCredito => Icons.manage_search,
+  EtapaFinanciamento.creditoAprovado => Icons.check_circle,
+  EtapaFinanciamento.creditoReprovado => Icons.cancel,
+  EtapaFinanciamento.engenharia => Icons.engineering,
+  EtapaFinanciamento.assinaturaDeContrato => Icons.draw,
+};
 
 class _ClienteListViewState extends State<ClienteListView> {
   final _controller = ClienteController();
-  EtapaFinanciamento statusAtual = EtapaFinanciamento.montagemDePasta;
+  EtapaFinanciamento _statusAtual = EtapaFinanciamento.montagemDePasta;
 
   @override
   Widget build(BuildContext context) {
     final cores = Theme.of(context).colorScheme;
 
     // Filtra os clientes pela etapa selecionada.
-  
-    final clientesFiltrados = _controller.listarPorEtapa(statusAtual);
+
+    final clientesFiltrados = _controller.listarPorEtapa(_statusAtual);
 
     return Scaffold(
       appBar: AppBar(
@@ -48,13 +47,13 @@ class _ClienteListViewState extends State<ClienteListView> {
                 for (final etapa in EtapaFinanciamento.values)
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: (etapa == statusAtual
+                      foregroundColor: (etapa == _statusAtual
                           ? cores.onSecondary
                           : cores.primary),
                     ),
                     onPressed: () {
                       setState(() {
-                        statusAtual = etapa;
+                        _statusAtual = etapa;
                       });
                     },
                     child: Icon(_iconeDaEtapa(etapa)),
@@ -62,7 +61,7 @@ class _ClienteListViewState extends State<ClienteListView> {
               ],
             ),
           ),
-          Text(statusAtual.rotulo),
+          Text(_statusAtual.rotulo),
           // A lista ocupa o espaço restante da tela.
           Expanded(
             child: ListView.builder(
@@ -75,9 +74,13 @@ class _ClienteListViewState extends State<ClienteListView> {
                     leading: const Icon(Icons.face),
                     title: Text(cliente.nome),
                     subtitle: Text(cliente.email),
-                    onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteView(cliente: cliente),
-                    )
-                    );
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ClienteView(cliente: cliente),
+                        ),
+                      );
                     },
                   ),
                 );

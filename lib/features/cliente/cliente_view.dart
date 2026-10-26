@@ -13,32 +13,36 @@ class ClienteView extends StatelessWidget {
       body: ListView(
         children: [
           ListTile(
-          leading: const Icon(Icons.email),
-          title: const Text('Email'),
-          subtitle: Text(cliente.email),
+            leading: const Icon(Icons.email),
+            title: const Text('Email'),
+            subtitle: Text(cliente.email),
           ),
           ListTile(
-          leading: const Icon(Icons.phone_android),
-          title: const Text('Telefone'),
-          subtitle: Text(cliente.telefone),
+            leading: const Icon(Icons.phone_android),
+            title: const Text('Telefone'),
+            subtitle: Text(cliente.telefone),
           ),
           ListTile(
-          leading: const Icon(Icons.timeline),
-          title: const Text('Etapa financiamento'),
-          subtitle: Text(cliente.etapaFinanciamento.rotulo),
+            leading: const Icon(Icons.timeline),
+            title: const Text('Etapa financiamento'),
+            subtitle: Text(cliente.etapaFinanciamento.rotulo),
           ),
           ListTile(
-          leading: const Icon(Icons.savings),
-          title: const Text('Capital próprio'),
-          subtitle: Text('R\$ ${cliente.capitalProprio.toStringAsFixed(2).replaceAll('.', ',')}'),
+            leading: const Icon(Icons.savings),
+            title: const Text('Capital próprio'),
+            subtitle: Text(
+              'R\$ ${cliente.capitalProprio.toStringAsFixed(2).replaceAll('.', ',')}',
+            ),
           ),
           ListTile(
-          leading: const Icon(Icons.account_balance),
-          title: const Text('Carta de crédito'),
-          subtitle: Text('R\$ ${cliente.cartaCredito.toStringAsFixed(2).replaceAll('.', ',')}'),
+            leading: const Icon(Icons.account_balance),
+            title: const Text('Carta de crédito'),
+            subtitle: Text(
+              'R\$ ${cliente.cartaCredito.toStringAsFixed(2).replaceAll('.', ',')}',
+            ),
           ),
-          ],
-      )
+        ],
+      ),
     );
   }
 }
