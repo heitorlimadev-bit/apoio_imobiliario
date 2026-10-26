@@ -5,13 +5,15 @@ import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 class ClienteController {
   final _clientes = List.of(clientesMock);
 
-  List <ClienteModel> listarPorEtapa(EtapaFinanciamento statusAtual) {
-
-    return _clientes.where((cliente) => cliente.etapaFinanciamento == statusAtual).toList();
-
+  List<ClienteModel> listarPorEtapa(EtapaFinanciamento statusAtual) {
+    return _clientes
+        .where((cliente) => cliente.etapaFinanciamento == statusAtual)
+        .toList();
   }
+
   void atualizar(ClienteModel clienteAtualizado) {
-    final posicao = _clientes.indexWhere((cliente) => cliente.id == clienteAtualizado.id,
+    final posicao = _clientes.indexWhere(
+      (cliente) => cliente.id == clienteAtualizado.id,
     );
 
     if (posicao == -1) return;
@@ -19,7 +21,3 @@ class ClienteController {
     _clientes[posicao] = clienteAtualizado;
   }
 }
-    
-   
-
-
