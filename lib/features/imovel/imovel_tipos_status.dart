@@ -1,3 +1,19 @@
-enum Tipo { apartamento, casa, terreno, salaComercial, galpao }
+enum TipoImovel { 
+  apartamento('Apartamento'),
+  casa('Casa'),
+  terreno('Terreno'), 
+  salaComercial('Sala'), 
+  galpao('Galpao');
 
-enum Status { disponivel, vendido, alugado }
+  const TipoImovel(this.rotulo);
+  final String rotulo;
+}
+
+enum StatusImovel { 
+  disponivel('a'), 
+  vendido('a'), 
+  alugado('Alugado');
+
+  const StatusImovel (this.rotulo);
+  final String rotulo;
+}
