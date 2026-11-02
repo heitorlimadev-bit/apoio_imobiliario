@@ -1,3 +1,4 @@
+import 'package:apoio_imobiliario/features/imovel/imoveis_view.dart';
 import 'package:flutter/material.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_view.dart';
 import 'package:apoio_imobiliario/features/splash/splash_view.dart';
@@ -81,7 +82,17 @@ class App extends StatelessWidget {
                   },
                   child: const Text('Debug Tela de Login do Corretor'),
                 ),
-
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ImoveisView(),
+                      ),
+                    );
+                  },
+                  child: const Text('Debug Tela Imóveis disponíveis'),
+                ),
                 //Basta substituir o SplashView() pelo widget que você quer testar
               ],
             );
