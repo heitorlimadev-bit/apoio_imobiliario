@@ -1,5 +1,9 @@
 
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'package:apoio_imobiliario/services/auth_service.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_list_view.dart';
 
 class PrimeiroAcessoView extends StatefulWidget {
@@ -20,6 +24,9 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
   // Chave para validar o formulário.
   final _formKey = GlobalKey<FormState>();
 
+  // Controla o estado do botão durante o cadastro.
+  bool _carregando = false;
+
   @override
   void dispose() {
     _nomeController.dispose();
@@ -29,18 +36,91 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
     super.dispose();
   }
 
-  // Valida os dados e encaminha para a lista de clientes.
-  void _cadastrar() {
+  // Valida os dados e cadastra o usuário no Firebase.
+  Future<void> _cadastrar() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ClienteListView(),
-      ),
-    );
+    setState(() {
+      _carregando = true;
+    });
+
+    try {
+      // Envia os dados para o Firebase.
+      await AuthService().cadastrar(
+        nome: _nomeController.text,
+        email: _emailController.text,
+        senha: _senhaController.text,
+      );
+
+      if (!mounted) return;
+
+      // Cadastro concluído.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Conta criada com sucesso!'),
+        ),
+      );
+
+      // Encaminha para a lista de clientes.
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ClienteListView(),
+        ),
+      );
+    } on FirebaseAuthException catch (erro) {
+      if (!mounted) return;
+
+      String mensagem;
+
+      switch (erro.code) {
+        case 'email-already-in-use':
+          mensagem = 'Este e-mail já está cadastrado.';
+          break;
+        case 'invalid-email':
+          mensagem = 'O endereço de e-mail é inválido.';
+          break;
+        case 'weak-password':
+          mensagem = 'A senha é muito fraca.';
+          break;
+        case 'operation-not-allowed':
+          mensagem = 'O cadastro por e-mail não está habilitado no Firebase.';
+          break;
+        case 'network-request-failed':
+          mensagem = 'Verifique sua conexão com a internet.';
+          break;
+        default:
+          mensagem = 'Erro ao cadastrar: ${erro.message ?? erro.code}';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensagem)),
+      );
+    } on FirebaseException catch (erro) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao salvar os dados: ${erro.message ?? erro.code}'),
+        ),
+      );
+    } catch (erro) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ocorreu um erro inesperado: $erro'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _carregando = false;
+        });
+      }
+    }
   }
 
   @override
@@ -49,14 +129,11 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
       appBar: AppBar(
         title: const Text('Primeiro acesso'),
       ),
-
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-
           child: Form(
             key: _formKey,
-
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -116,8 +193,7 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
                       return 'Informe seu e-mail.';
                     }
 
-                    if (!valor.contains('@') ||
-                        !valor.contains('.')) {
+                    if (!valor.contains('@') || !valor.contains('.')) {
                       return 'Informe um e-mail válido.';
                     }
 
@@ -179,8 +255,16 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _cadastrar,
-                    child: const Text('Cadastrar e continuar'),
+                    onPressed: _carregando ? null : _cadastrar,
+                    child: _carregando
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Cadastrar e continuar'),
                   ),
                 ),
               ],
