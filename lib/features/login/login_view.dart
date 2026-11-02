@@ -1,4 +1,7 @@
+
 import 'package:flutter/material.dart';
+import 'package:apoio_imobiliario/features/login/primeiro_acesso_view.dart';
+import 'package:apoio_imobiliario/features/cliente/cliente_list_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -18,52 +21,100 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
+  // Encaminha o usuário para a lista de clientes.
+  // Por enquanto, estamos simulando a autenticação.
+  void _entrar() {
+    if (_loginController.text.isEmpty ||
+        _senhaController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Preencha o login e a senha.'),
+        ),
+      );
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ClienteListView(),
+      ),
+    );
+  }
+
+  // Abre a tela de primeiro acesso.
+  void _abrirPrimeiroAcesso() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PrimeiroAcessoView(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Desbloquear o App',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              const Icon(
+                Icons.home_work_outlined,
+                size: 65,
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 16),
+
+              const Text(
+                'Apoio Imobiliário',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
               TextField(
                 controller: _loginController,
                 decoration: const InputDecoration(
-                  labelText: 'Login',
+                  labelText: 'Login / E-mail',
                   border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(width: 2),
-                  ),
                 ),
               ),
+
               const SizedBox(height: 16),
+
               TextField(
                 controller: _senhaController,
                 obscureText: true,
-                style: const TextStyle(),
                 decoration: const InputDecoration(
                   labelText: 'Senha',
-                  enabledBorder: OutlineInputBorder(borderSide: BorderSide()),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(width: 2),
-                  ),
+                  border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('App desbloqueado!')),
-                  );
-                },
-                child: const Text('Entrar'),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _entrar,
+                  child: const Text('Entrar'),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Opção para quem ainda não possui cadastro.
+              TextButton(
+                onPressed: _abrirPrimeiroAcesso,
+                child: const Text(
+                  'Primeiro acesso? Cadastre-se',
+                ),
               ),
             ],
           ),
