@@ -14,27 +14,34 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
+  // Controladores dos campos.
   final _loginController = TextEditingController();
   final _senhaController = TextEditingController();
 
+  // Controla o foco entre os campos.
+  final _senhaFocusNode = FocusNode();
+
+  // Controla a visibilidade da senha.
+  bool _mostrarSenha = false;
+
+  // Controla o carregamento do botão.
   bool _carregando = false;
 
   @override
   void dispose() {
     _loginController.dispose();
     _senhaController.dispose();
+    _senhaFocusNode.dispose();
     super.dispose();
   }
 
   // Autentica o usuário pelo Firebase.
   Future<void> _entrar() async {
-    if (_loginController.text.trim().isEmpty ||
-        _senhaController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Preencha o e-mail e a senha.'),
-        ),
-      );
+    final email = _loginController.text.trim();
+    final senha = _senhaController.text;
+
+    if (email.isEmpty || senha.isEmpty) {
+      _mostrarMensagem('Preencha o e-mail e a senha.');
       return;
     }
 
@@ -43,15 +50,15 @@ class _LoginViewState extends State<LoginView> {
     });
 
     try {
-      // O Firebase verifica se o e-mail e a senha estão corretos.
+      // O Firebase verifica as credenciais.
       await AuthService().login(
-        email: _loginController.text,
-        senha: _senhaController.text,
+        email: email,
+        senha: senha,
       );
 
       if (!mounted) return;
 
-      // Só entra no sistema se a autenticação for bem-sucedida.
+      // Entra na lista somente após autenticação.
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -90,19 +97,11 @@ class _LoginViewState extends State<LoginView> {
           mensagem = 'Não foi possível entrar. Tente novamente.';
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(mensagem),
-        ),
-      );
+      _mostrarMensagem(mensagem);
     } catch (erro) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ocorreu um erro inesperado ao entrar.'),
-        ),
-      );
+      _mostrarMensagem('Ocorreu um erro inesperado ao entrar.');
     } finally {
       if (mounted) {
         setState(() {
@@ -110,6 +109,15 @@ class _LoginViewState extends State<LoginView> {
         });
       }
     }
+  }
+
+  // Exibe mensagens na tela.
+  void _mostrarMensagem(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+      ),
+    );
   }
 
   // Abre a tela de primeiro acesso.
@@ -128,77 +136,103 @@ class _LoginViewState extends State<LoginView> {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.home_work_outlined,
-                size: 65,
-              ),
-
-              const SizedBox(height: 16),
-
-              const Text(
-                'Apoio Imobiliário',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 400,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.home_work_outlined,
+                  size: 65,
                 ),
-              ),
 
-              const SizedBox(height: 32),
+                const SizedBox(height: 16),
 
-              // E-mail.
-              TextField(
-                controller: _loginController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Login / E-mail',
-                  border: OutlineInputBorder(),
+                // Título usando o tema global.
+                Text(
+                  'Apoio Imobiliário',
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-              ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 32),
 
-              // Senha.
-              TextField(
-                controller: _senhaController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Senha',
-                  border: OutlineInputBorder(),
+                // Campo de e-mail.
+                TextField(
+                  controller: _loginController,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  onSubmitted: (_) {
+                    _senhaFocusNode.requestFocus();
+                  },
+                  decoration: const InputDecoration(
+                    labelText: 'Login / E-mail',
+                    prefixIcon: Icon(Icons.email_outlined),
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
-              // Botão de login.
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _carregando ? null : _entrar,
-                  child: _carregando
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text('Entrar'),
+                // Campo de senha.
+                TextField(
+                  controller: _senhaController,
+                  focusNode: _senhaFocusNode,
+                  obscureText: !_mostrarSenha,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _entrar(),
+                  decoration: InputDecoration(
+                    labelText: 'Senha',
+                    prefixIcon: const Icon(Icons.lock_outline),
+
+                    // Botão para mostrar ou ocultar a senha.
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _mostrarSenha = !_mostrarSenha;
+                        });
+                      },
+                      icon: Icon(
+                        _mostrarSenha
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 24),
 
-              // Primeiro acesso.
-              TextButton(
-                onPressed: _carregando ? null : _abrirPrimeiroAcesso,
-                child: const Text(
-                  'Primeiro acesso? Cadastre-se',
+                // Botão de login.
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _carregando ? null : _entrar,
+                    child: _carregando
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Entrar'),
+                  ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 12),
+
+                // Primeiro acesso.
+                TextButton(
+                  onPressed: _carregando
+                      ? null
+                      : _abrirPrimeiroAcesso,
+                  child: const Text(
+                    'Primeiro acesso? Cadastre-se',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
