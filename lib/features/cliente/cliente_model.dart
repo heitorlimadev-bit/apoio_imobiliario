@@ -1,13 +1,13 @@
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
 
 class ClienteModel {
-  int id;
-  String nome;
-  String email;
-  String telefone;
-  int capitalProprio;
-  int cartaCredito;
-  EtapaFinanciamento etapaFinanciamento;
+  final int id;
+  final String nome;
+  final String email;
+  final String telefone;
+  final int capitalProprio;
+  final int cartaCredito;
+  final EtapaFinanciamento etapaFinanciamento;
 
   ClienteModel({
     required this.id,

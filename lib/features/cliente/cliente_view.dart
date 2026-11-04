@@ -25,6 +25,7 @@ class _ClienteViewState extends State<ClienteView> {
     super.dispose();
   }
   
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.cliente.nome)),
