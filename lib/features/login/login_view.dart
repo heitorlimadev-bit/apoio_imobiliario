@@ -17,23 +17,19 @@ class _LoginViewState extends State<LoginView> {
     _senhaController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisSize:
-                MainAxisSize.min,
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
                 'Desbloquear o App',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
               TextField(
@@ -41,8 +37,7 @@ class _LoginViewState extends State<LoginView> {
                 decoration: const InputDecoration(
                   labelText: 'Login',
                   border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                  ),
+                  enabledBorder: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(width: 2),
                   ),

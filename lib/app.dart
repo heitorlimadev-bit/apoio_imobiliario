@@ -36,8 +36,6 @@ class App extends StatelessWidget {
                   child: const Text('Debug Tela lista de Clientes'),
                 ),
 
-
-
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -65,7 +63,8 @@ class App extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ClienteView(cliente: clientesMock[1]),
+                        builder: (context) =>
+                            ClienteView(cliente: clientesMock[1]),
                       ),
                     );
                   },
@@ -73,16 +72,17 @@ class App extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginView()),
-                  );
-                },
-                child: const Text('Debug Tela de Login do Corretor'),
-                  ),
-                //Basta substituir o SplashView() pelo widget que você quer testar
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginView(),
+                      ),
+                    );
+                  },
+                  child: const Text('Debug Tela de Login do Corretor'),
+                ),
 
-                
+                //Basta substituir o SplashView() pelo widget que você quer testar
               ],
             );
           },

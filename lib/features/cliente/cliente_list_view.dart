@@ -10,15 +10,14 @@ class ClienteListView extends StatefulWidget {
   State<ClienteListView> createState() => _ClienteListViewState();
 }
 
-  IconData _iconeDaEtapa(EtapaFinanciamento etapa) => switch (etapa) {
-    EtapaFinanciamento.montagemDePasta => Icons.folder_open,
-    EtapaFinanciamento.analiseDeCredito => Icons.manage_search,
-    EtapaFinanciamento.creditoAprovado => Icons.check_circle,
-    EtapaFinanciamento.creditoReprovado => Icons.cancel,
-    EtapaFinanciamento.engenharia => Icons.engineering,
-    EtapaFinanciamento.assinaturaDeContrato => Icons.draw,
-  };
-
+IconData _iconeDaEtapa(EtapaFinanciamento etapa) => switch (etapa) {
+  EtapaFinanciamento.montagemDePasta => Icons.folder_open,
+  EtapaFinanciamento.analiseDeCredito => Icons.manage_search,
+  EtapaFinanciamento.creditoAprovado => Icons.check_circle,
+  EtapaFinanciamento.creditoReprovado => Icons.cancel,
+  EtapaFinanciamento.engenharia => Icons.engineering,
+  EtapaFinanciamento.assinaturaDeContrato => Icons.draw,
+};
 
 class _ClienteListViewState extends State<ClienteListView> {
   final _controller = ClienteController();
@@ -29,7 +28,7 @@ class _ClienteListViewState extends State<ClienteListView> {
     final cores = Theme.of(context).colorScheme;
 
     // Filtra os clientes pela etapa selecionada.
-  
+
     final clientesFiltrados = _controller.listarPorEtapa(statusAtual);
 
     return Scaffold(
@@ -75,9 +74,13 @@ class _ClienteListViewState extends State<ClienteListView> {
                     leading: const Icon(Icons.face),
                     title: Text(cliente.nome),
                     subtitle: Text(cliente.email),
-                    onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ClienteView(cliente: cliente),
-                    )
-                    );
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ClienteView(cliente: cliente),
+                        ),
+                      );
                     },
                   ),
                 );
