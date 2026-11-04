@@ -102,5 +102,3 @@ class App extends StatelessWidget {
     );
   }
 }
-
-// teste de app felipe 21/10

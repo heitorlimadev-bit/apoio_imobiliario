@@ -1,16 +1,25 @@
+
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'firebase_options.dart';
 import 'package:apoio_imobiliario/core/theme/app_theme.dart';
 import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
-import 'package:flutter/material.dart';
 import 'package:apoio_imobiliario/app.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializa o Firebase antes de abrir o aplicativo
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.temaEscuro,
-      builder: (context, child) => Fundopadrao(conteudo: child!),
       home: const App(),
     ),
   );
 }
-
-// um commit no código novo, felipe 21/10 - teste,git mv lib/App.dart lib/app_tmp.dart
