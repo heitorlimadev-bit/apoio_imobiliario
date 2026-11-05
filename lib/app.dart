@@ -5,6 +5,7 @@ import 'package:apoio_imobiliario/features/splash/splash_view.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_list_view.dart';
 import 'package:apoio_imobiliario/features/cliente/clientes_mock.dart';
 import 'package:apoio_imobiliario/features/login/login_view.dart';
+import 'package:apoio_imobiliario/features/login/primeiro_acesso_view.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -57,11 +58,11 @@ class App extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const SplashView(),
+                        builder: (context) => const PrimeiroAcessoView(),
                       ),
                     );
                   },
-                  child: const Text('Debug Tela splash (placeholder)'),
+                  child: const Text('Debug Tela Primeiro acesso'),
                 ),
                 ElevatedButton(
                   onPressed: () {

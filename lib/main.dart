@@ -21,5 +21,5 @@ void main() async {
       theme: AppTheme.temaEscuro,
       home: const App(),
     ),
-  );
+  ); 
 }
