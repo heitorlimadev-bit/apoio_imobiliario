@@ -13,10 +13,7 @@ class ImovelCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      clipBehavior: Clip.antiAlias,
-      color: const Color.fromARGB(40, 123, 238, 78), // Fundo do card
+      clipBehavior: Clip.antiAlias, // cor, borda e raio vêm do tema
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -25,12 +22,12 @@ class ImovelCard extends StatelessWidget {
           // Área da Foto com Ícone de Favorito
           Stack(
             children: [
-              _buildImagem(), // O antigo Container cinza foi substituído por esta linha
+              _buildImagem(cores), // O antigo Container cinza foi substituído por esta linha
             ],
           ),
 
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -38,17 +35,18 @@ class ImovelCard extends StatelessWidget {
                 Text(
                   imovel.descricaoImovel,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cores.onSurface,
+                    color: cores.onSurfaceVariant,
+                    height: 1.35,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 // Rua e Bairro
                 Text(
                   imovel.ruaImovel,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: cores.onSurface,
                   ),
                 ),
@@ -58,7 +56,7 @@ class ImovelCard extends StatelessWidget {
                     color: cores.onSecondary,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 // Ícones de características
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,9 +79,9 @@ class ImovelCard extends StatelessWidget {
                 // Preço
                 Text(
                   'R\$ ${imovel.valor.toStringAsFixed(0)}',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: cores.onSurface,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: cores.primary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -93,28 +91,19 @@ class ImovelCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: cores.primary,
-                          foregroundColor: cores.onPrimary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
                         onPressed: () {}, //vazio por enquanto
                         child: const Text('WhatsApp'),
                       ),
                     ),
 
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: cores.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        fixedSize: const Size(48, 48),
+                        padding: EdgeInsets.zero,
                       ),
                       onPressed: () {}, //vazio por enquanto
-                      child: Icon(Icons.phone, color: cores.primary),
+                      child: Icon(Icons.phone, color: cores.primary, size: 20),
                     ),
                   ],
                 ),
@@ -128,43 +117,58 @@ class ImovelCard extends StatelessWidget {
 
   // Widget auxiliar para os ícones pequenos (área, quartos, etc)
   Widget _buildIconRow(IconData icon, String text, ColorScheme cores) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: cores.onSecondary),
-        const SizedBox(width: 4),
-        Text(text, style: TextStyle(color: cores.onSurface)),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: cores.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: cores.onSecondary),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              color: cores.onSurface,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildImagem() {
+  Widget _buildImagem(ColorScheme cores) {
     // 1. Verifica se a string veio completamente vazia
     if (imovel.foto.isEmpty) {
-      return _buildFundoSemFoto();
+      return _buildFundoSemFoto(cores);
     }
 
     // 2. Tenta carregar a foto. Se der erro (arquivo não encontrado), exibe o fundo cinza.
     return Image.asset(
       imovel.foto,
-      height: 200,
+      height: 190,
       width: double.infinity,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        return _buildFundoSemFoto();
+        return _buildFundoSemFoto(cores);
       },
     );
   }
 
   // Método que desenha o fundo cinza com o ícone de imagem ausente
-  Widget _buildFundoSemFoto() {
+  Widget _buildFundoSemFoto(ColorScheme cores) {
     return Container(
-      height: 200,
+      height: 190,
       width: double.infinity,
-      color: Colors.grey[800],
-      child: const Icon(
-        Icons.image_not_supported,
-        size: 50,
-        color: Colors.grey,
+      color: cores.surfaceContainerHigh,
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        size: 44,
+        color: cores.onSurfaceVariant,
       ),
     );
   }

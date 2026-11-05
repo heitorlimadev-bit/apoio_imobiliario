@@ -131,15 +131,25 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.person_add_alt_1,
-                  size: 60,
+                Center(
+                  child: CircleAvatar(
+                    radius: 36,
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onPrimaryContainer,
+                    child: const Icon(
+                      Icons.person_add_alt_1,
+                      size: 34,
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 16),
@@ -147,26 +157,28 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
                 const Text(
                   'Criar conta',
                   style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
 
                 const SizedBox(height: 8),
 
-                const Text(
+                Text(
                   'Preencha seus dados para acessar o sistema.',
                   textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 32),
 
                 // Nome completo.
                 TextFormField(
                   controller: _nomeController,
                   decoration: const InputDecoration(
                     labelText: 'Nome completo',
-                    border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.person),
                   ),
                   validator: (valor) {
@@ -185,7 +197,6 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: 'E-mail',
-                    border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
                   ),
                   validator: (valor) {
@@ -209,7 +220,6 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
                   obscureText: true,
                   decoration: const InputDecoration(
                     labelText: 'Senha',
-                    border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.lock),
                   ),
                   validator: (valor) {
@@ -233,7 +243,6 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
                   obscureText: true,
                   decoration: const InputDecoration(
                     labelText: 'Confirmar senha',
-                    border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
                   validator: (valor) {
@@ -255,6 +264,9 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                    ),
                     onPressed: _carregando ? null : _cadastrar,
                     child: _carregando
                         ? const SizedBox(
@@ -269,6 +281,7 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

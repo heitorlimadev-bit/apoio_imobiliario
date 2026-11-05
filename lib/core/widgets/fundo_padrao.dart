@@ -22,7 +22,9 @@ class Fundopadrao extends StatelessWidget {
         image: const DecorationImage(
           image: AssetImage('assets/images/DoodlePreto1.png'),
           repeat: ImageRepeat.repeat,
-          opacity: 0.2,
+          opacity: 0.1, // textura discreta
+          // Pinta os desenhos (originalmente pretos) com o verde do tema
+          colorFilter: ColorFilter.mode(Color.fromARGB(255, 31, 221, 104), BlendMode.srcIn),
         ),
       ),
       child: conteudo,

@@ -146,58 +146,63 @@ class _LoginViewState extends State<LoginView> {
         ),
 
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Opacity(
-                  opacity: 1.0,
-                  child: Image.asset(
-                    'assets/images/SenhorCorretorLogoVerde.png',
-                    height: 200, //tamanho da img, largura acompanha proporção
-                  ),
-                ),
-                const SizedBox(height: 30), //caixa p/ logo n ficar colada
-                const Text(
-                  'Desbloquear o App',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _loginController,
-                  decoration: const InputDecoration(
-                    labelText: 'Login',
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(width: 2),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Opacity(
+                    opacity: 1.0,
+                    child: Image.asset(
+                      'assets/images/SenhorCorretorLogoVerde.png',
+                      height: 150, //tamanho da img, largura acompanha proporção
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _senhaController,
-                  obscureText: true,
-                  style: const TextStyle(),
-                  decoration: const InputDecoration(
-                    labelText: 'Senha',
-                    enabledBorder: OutlineInputBorder(borderSide: BorderSide()),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(width: 2),
+                  const SizedBox(height: 28), //caixa p/ logo n ficar colada
+                  Text(
+                    'Desbloquear o App',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: cores.onSurface,
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('App desbloqueado!')),
-                    );
-                  },
-                  child: const Text('Entrar'),
-                ),
-              ],
+                  const SizedBox(height: 28),
+                  TextField(
+                    controller: _loginController,
+                    decoration: const InputDecoration(
+                      labelText: 'Login',
+                      prefixIcon: Icon(Icons.person_outline),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _senhaController,
+                    obscureText: true,
+                    style: const TextStyle(),
+                    decoration: const InputDecoration(
+                      labelText: 'Senha',
+                      prefixIcon: Icon(Icons.lock_outline),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                    ),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('App desbloqueado!')),
+                      );
+                    },
+                    child: const Text('Entrar'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

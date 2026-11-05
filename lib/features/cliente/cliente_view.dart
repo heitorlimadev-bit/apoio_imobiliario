@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 
 class ClienteView extends StatefulWidget {
@@ -27,10 +28,18 @@ class _ClienteViewState extends State<ClienteView> {
   
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Fundopadrao(
+      conteudo: Scaffold(
+      backgroundColor: Colors.transparent, // deixa o fundo padrão aparecer
       appBar: AppBar(title: Text(widget.cliente.nome)),
       body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 12),
         children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                children: [
           ListTile(
             leading: const Icon(Icons.email),
             title: const Text('Email'),
@@ -60,7 +69,12 @@ class _ClienteViewState extends State<ClienteView> {
               'R\$ ${widget.cliente.cartaCredito.toStringAsFixed(2).replaceAll('.', ',')}',
             ),
           ),
+                ],
+              ),
+            ),
+          ),
         ],
+      ),
       ),
     );
   }

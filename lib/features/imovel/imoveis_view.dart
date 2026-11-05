@@ -17,6 +17,7 @@ class ImoveisView extends StatelessWidget {
           backgroundColor: Colors.transparent,
         ),
         body: ListView.builder(
+          padding: const EdgeInsets.only(top: 4, bottom: 16),
           itemCount: imoveisMock.length,
           itemBuilder: (context, index) {
             final imovel = imoveisMock[index];

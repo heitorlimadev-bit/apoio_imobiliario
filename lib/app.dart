@@ -16,10 +16,14 @@ class App extends StatelessWidget {
       body: Center(
         child: Builder(
           builder: (context) {
-            return Column(
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+              spacing: 10,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 AppBar(title: const Center(child: Text('AppBar'))),
-                const Text('Botões debug do app'),
+                const Text('Botões debug do app', textAlign: TextAlign.center),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -95,6 +99,7 @@ class App extends StatelessWidget {
                 ),
                 //Basta substituir o SplashView() pelo widget que você quer testar
               ],
+            ),
             );
           },
         ),
