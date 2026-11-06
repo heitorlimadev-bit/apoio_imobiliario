@@ -1,3 +1,4 @@
+import 'package:apoio_imobiliario/features/imovel/imovel_tipos_status.dart';
 import 'package:flutter/material.dart';
 import 'package:apoio_imobiliario/features/imovel/imovel_model.dart'; // Ajuste o caminho
 
@@ -17,12 +18,14 @@ class ImovelCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Área da Foto com Ícone de Favorito
+          // Área da Foto
 
-          // Área da Foto com Ícone de Favorito
+          // Área da Foto
           Stack(
             children: [
-              _buildImagem(cores), // O antigo Container cinza foi substituído por esta linha
+              _buildImagem(
+                cores,
+              ), // O antigo Container cinza foi substituído por esta linha
             ],
           ),
 
@@ -31,6 +34,40 @@ class ImovelCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Tipo
+                    Text(
+                      imovel.tipoImovel.rotulo,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: cores.onSurfaceVariant,
+                        height: 1.35,
+                      ),
+                    ),
+
+                    // Status
+                    Text(
+                      imovel.statusImovel.rotulo,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: cores.onSurfaceVariant,
+                        height: 1.35,
+                      ),
+                    ),
+
+                    //interesse em negociacao
+                    Text(
+                      imovel.negociacaoImovel.rotulo,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: cores.onSurfaceVariant,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
                 // Descrição
                 Text(
                   imovel.descricaoImovel,
@@ -38,25 +75,38 @@ class ImovelCard extends StatelessWidget {
                     color: cores.onSurfaceVariant,
                     height: 1.35,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
+
                 const SizedBox(height: 10),
+
                 // Rua e Bairro
                 Text(
-                  imovel.ruaImovel,
+                  (imovel.tipoImovel == TipoImovel.apartamento ||
+                          imovel.tipoImovel == TipoImovel.salaComercial)
+                      ? '${imovel.ruaImovel}, ${imovel.numeroImovel} apt ${imovel.numeroApImovel}'
+                      : '${imovel.ruaImovel}, ${imovel.numeroImovel}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: cores.onSurface,
                   ),
                 ),
+
                 Text(
                   imovel.bairroImovel,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: cores.onSecondary,
                   ),
                 ),
+
+                Text(
+                  imovel.cidadeImovel,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cores.onSecondary,
+                  ),
+                ),
+
                 const SizedBox(height: 14),
+
                 // Ícones de características
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -75,15 +125,18 @@ class ImovelCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 16),
+
                 // Preço
                 Text(
-                  'R\$ ${imovel.valor.toStringAsFixed(0)}',
+                  formatarValor(imovel.valor),
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: cores.primary,
                   ),
                 ),
+
                 const SizedBox(height: 16),
 
                 // Botões Contatar e WhatsApp
@@ -157,6 +210,17 @@ class ImovelCard extends StatelessWidget {
         return _buildFundoSemFoto(cores);
       },
     );
+  }
+
+  //metodo para formatar os milhares do valor do card
+  String formatarValor(num valor) {
+    final valorInteiro = valor.toInt().toString();
+    // Insere o ponto a cada 3 dígitos da direita para a esquerda
+    final valorComPontos = valorInteiro.replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
+    );
+    return 'R\$ $valorComPontos';
   }
 
   // Método que desenha o fundo cinza com o ícone de imagem ausente

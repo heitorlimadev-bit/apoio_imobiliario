@@ -10,10 +10,19 @@ enum TipoImovel {
 }
 
 enum StatusImovel { 
-  disponivel('a'), 
-  vendido('a'), 
+  disponivel('Disponível'), 
+  vendido('Vendido'), 
   alugado('Alugado');
 
   const StatusImovel (this.rotulo);
+  final String rotulo;
+}
+
+enum NegociacaoImovel{
+  aluguel('Aluguel'),
+  venda('Venda'),
+  troca('Troca');
+
+  const NegociacaoImovel (this.rotulo);
   final String rotulo;
 }
