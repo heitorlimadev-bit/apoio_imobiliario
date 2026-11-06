@@ -1,9 +1,10 @@
+
 import 'package:apoio_imobiliario/features/cliente/clientes_mock.dart';
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 
 class ClienteController {
-  final _clientes = List.of(clientesMock);
+  final List<ClienteModel> _clientes = List.of(clientesMock);
 
   List<ClienteModel> listarPorEtapa(EtapaFinanciamento statusAtual) {
     return _clientes
@@ -11,6 +12,28 @@ class ClienteController {
         .toList();
   }
 
+  // Adiciona um cliente com o próximo ID disponível.
+  ClienteModel adicionar(ClienteModel cliente) {
+    final proximoId = _clientes.isEmpty
+        ? 1
+        : _clientes.map((c) => c.id).reduce((a, b) => a > b ? a : b) + 1;
+
+    final novoCliente = ClienteModel(
+      id: proximoId,
+      nome: cliente.nome,
+      email: cliente.email,
+      telefone: cliente.telefone,
+      capitalProprio: cliente.capitalProprio,
+      cartaCredito: cliente.cartaCredito,
+      etapaFinanciamento: cliente.etapaFinanciamento,
+    );
+
+    _clientes.add(novoCliente);
+
+    return novoCliente;
+  }
+
+  // Atualiza os dados de um cliente existente.
   void etapaSeguinte(ClienteModel cliente) {
     final etapaAtual = cliente.etapaFinanciamento;
     final clienteAtualizado = cliente.copyWith(etapaFinanciamento:etapaAtual.seguinte);
