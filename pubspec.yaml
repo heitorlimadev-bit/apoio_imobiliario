@@ -35,6 +35,7 @@ dependencies:
     sdk: flutter
   firebase_auth: ^7.0.1
   cloud_firestore: ^7.1.0
+  flutter_contacts: ^2.6.0 # pega o contato dos clientes pelo telefone do usuário
 dev_dependencies:
   flutter_test:
     sdk: flutter

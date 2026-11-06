@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<uses-permission android:name="android.permission.READ_CONTACTS"/>  <!--isso aqui serve para pegar os contatos do telefone e transformar em clientes-->
     <application
         android:label="apoio_imobiliario"
         android:name="${applicationName}"
