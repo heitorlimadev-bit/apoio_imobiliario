@@ -99,7 +99,28 @@ class _ClienteListViewState extends State<ClienteListView> {
               itemBuilder: (context, index) {
                 final cliente = clientesFiltrados[index];
 
-                return Card(
+                return Dismissible(key: ValueKey(cliente.id),
+                  direction: DismissDirection.horizontal,
+                  background: Container(
+                    alignment: Alignment.centerLeft,
+                    child: const Icon(Icons.arrow_right),
+                  ),
+                  secondaryBackground: Container(
+                    alignment: Alignment.centerRight,
+                    child: const Icon(Icons.arrow_left),
+                  ),
+
+                  onDismissed: (direcao) {
+                    if (direcao == DismissDirection.startToEnd) {
+                      _controller.etapaSeguinte(cliente);
+                    }
+                    else {
+                      _controller.etapaAnterior(cliente);
+                    }
+                    setState(() {
+                    });
+                  },
+                  child: Card(
                   clipBehavior: Clip.antiAlias,
                   child: ListTile(
                     leading: CircleAvatar(
@@ -122,7 +143,9 @@ class _ClienteListViewState extends State<ClienteListView> {
                       );
                     },
                   ),
+                )
                 );
+                
               },
             ),
           ),

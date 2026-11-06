@@ -9,6 +9,8 @@ class ClienteModel {
   final int cartaCredito;
   final EtapaFinanciamento etapaFinanciamento;
 
+
+
   ClienteModel({
     required this.id,
     required this.nome,
@@ -18,4 +20,22 @@ class ClienteModel {
     required this.cartaCredito,
     required this.etapaFinanciamento,
   });
+
+  ClienteModel copyWith({
+    int? id,
+    String? nome, 
+    String? email, 
+    String? telefone, 
+    int? capitalProprio, 
+    int? cartaCredito, 
+    EtapaFinanciamento? etapaFinanciamento}) {
+      return ClienteModel(
+        id: this.id,
+        nome: this.nome,
+        email: email ?? this.email, 
+        telefone: telefone ?? this.telefone, 
+        capitalProprio: capitalProprio ?? this.capitalProprio, 
+        cartaCredito: cartaCredito ?? this.cartaCredito, 
+        etapaFinanciamento: etapaFinanciamento ?? this.etapaFinanciamento);
+      }
 }

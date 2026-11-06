@@ -11,13 +11,17 @@ class ClienteController {
         .toList();
   }
 
-  void atualizar(ClienteModel clienteAtualizado) {
-    final posicao = _clientes.indexWhere(
-      (cliente) => cliente.id == clienteAtualizado.id,
-    );
+  void etapaSeguinte(ClienteModel cliente) {
+    final etapaAtual = cliente.etapaFinanciamento;
+    final clienteAtualizado = cliente.copyWith(etapaFinanciamento:etapaAtual.seguinte);
+    final posicao = _clientes.indexOf(cliente);
+    _clientes[posicao] = clienteAtualizado;
 
-    if (posicao == -1) return;
-
+  }
+    void etapaAnterior(ClienteModel cliente) {
+    final etapaAtual = cliente.etapaFinanciamento;
+    final clienteAtualizado = cliente.copyWith(etapaFinanciamento:etapaAtual.anterior);
+    final posicao = _clientes.indexOf(cliente);
     _clientes[posicao] = clienteAtualizado;
   }
 }
