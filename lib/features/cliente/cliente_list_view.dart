@@ -1,9 +1,9 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_controller.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_form_view.dart';
+import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_view.dart';
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
 
@@ -11,17 +11,26 @@ class ClienteListView extends StatefulWidget {
   const ClienteListView({super.key});
 
   @override
-  State<ClienteListView> createState() => _ClienteListViewState();
+  State<ClienteListView> createState() =>
+      _ClienteListViewState();
 }
 
-IconData _iconeDaEtapa(EtapaFinanciamento etapa) => switch (etapa) {
-  EtapaFinanciamento.montagemDePasta => Icons.folder_open,
-  EtapaFinanciamento.analiseDeCredito => Icons.manage_search,
-  EtapaFinanciamento.creditoAprovado => Icons.check_circle,
-  EtapaFinanciamento.creditoReprovado => Icons.cancel,
-  EtapaFinanciamento.engenharia => Icons.engineering,
-  EtapaFinanciamento.assinaturaDeContrato => Icons.draw,
-};
+IconData _iconeDaEtapa(EtapaFinanciamento etapa) {
+  return switch (etapa) {
+    EtapaFinanciamento.montagemDePasta =>
+      Icons.folder_open,
+    EtapaFinanciamento.analiseDeCredito =>
+      Icons.manage_search,
+    EtapaFinanciamento.creditoAprovado =>
+      Icons.check_circle,
+    EtapaFinanciamento.creditoReprovado =>
+      Icons.cancel,
+    EtapaFinanciamento.engenharia =>
+      Icons.engineering,
+    EtapaFinanciamento.assinaturaDeContrato =>
+      Icons.draw,
+  };
+}
 
 class _ClienteListViewState extends State<ClienteListView> {
   final _controller = ClienteController();
@@ -29,49 +38,86 @@ class _ClienteListViewState extends State<ClienteListView> {
   EtapaFinanciamento _statusAtual =
       EtapaFinanciamento.montagemDePasta;
 
-  // Abre o formulário para cadastrar um cliente.
   Future<void> _adicionarCliente() async {
-    final resultado = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ClienteFormView(
-          controller: _controller,
-        ),
-      ),
-    );
-
-    if (!mounted) return;
-
-    if (resultado != null) {
-      setState(() {
-        _statusAtual = EtapaFinanciamento.montagemDePasta;
-      });
-    }
-  }
-
-  // Abre os detalhes do cliente.
-  Future<void> _abrirCliente(cliente) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ClienteView(
+        builder: (_) => ClienteFormView(
+          controller: _controller,
+          etapaInicial: _statusAtual,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _abrirCliente(ClienteModel cliente) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ClienteView(
           cliente: cliente,
           controller: _controller,
         ),
       ),
     );
+  }
 
-    if (!mounted) return;
+  // Deslizar para a direita avança.
+  // Deslizar para a esquerda retorna.
+  Future<bool> _deslizarCliente(
+    ClienteModel cliente,
+    DismissDirection direcao,
+  ) async {
+    final destino =
+        direcao == DismissDirection.startToEnd
+            ? cliente.etapaFinanciamento.seguinte
+            : cliente.etapaFinanciamento.anterior;
 
-    setState(() {});
+    if (destino == cliente.etapaFinanciamento) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Este cliente já está no limite das etapas nessa direção.',
+          ),
+        ),
+      );
+
+      return false;
+    }
+
+    try {
+      await _controller.alterarEtapa(cliente, destino);
+
+      if (!mounted) return true;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${cliente.nome} movido para ${destino.rotulo}.',
+          ),
+        ),
+      );
+
+      return true;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Não foi possível mudar a etapa: $e',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+
+      return false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final cores = Theme.of(context).colorScheme;
-
-    final clientesFiltrados =
-        _controller.listarPorEtapa(_statusAtual);
 
     return Fundopadrao(
       conteudo: Scaffold(
@@ -79,69 +125,79 @@ class _ClienteListViewState extends State<ClienteListView> {
         appBar: AppBar(
           title: const Text('Apoio Imobiliário'),
         ),
-
-        // Botão para cadastrar clientes.
         floatingActionButton: FloatingActionButton(
           onPressed: _adicionarCliente,
           tooltip: 'Adicionar cliente',
           child: const Icon(Icons.add),
         ),
-
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Botões para selecionar as etapas.
             LayoutBuilder(
-              builder: (context, limites) => SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minWidth: limites.maxWidth - 24,
+              builder: (context, limites) {
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (final etapa in EtapaFinanciamento.values)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                          ),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: etapa == _statusAtual
-                                  ? cores.primary
-                                  : cores.surfaceContainerHigh,
-                              foregroundColor: etapa == _statusAtual
-                                  ? cores.onPrimary
-                                  : cores.onSurfaceVariant,
-                              minimumSize: const Size(52, 48),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: limites.maxWidth - 24,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (final etapa
+                            in EtapaFinanciamento.values)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(
+                              horizontal: 4,
+                            ),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    etapa == _statusAtual
+                                        ? cores.primary
+                                        : cores.surfaceContainerHigh,
+                                foregroundColor:
+                                    etapa == _statusAtual
+                                        ? cores.onPrimary
+                                        : cores.onSurfaceVariant,
+                                minimumSize:
+                                    const Size(52, 48),
+                                padding:
+                                    const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _statusAtual = etapa;
+                                });
+                              },
+                              child: Icon(
+                                _iconeDaEtapa(etapa),
+                                size: 22,
                               ),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _statusAtual = etapa;
-                              });
-                            },
-                            child: Icon(
-                              _iconeDaEtapa(etapa),
-                              size: 22,
-                            ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
 
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+              padding: const EdgeInsets.fromLTRB(
+                20,
+                8,
+                20,
+                8,
+              ),
               child: Text(
                 _statusAtual.rotulo,
                 textAlign: TextAlign.center,
@@ -153,73 +209,132 @@ class _ClienteListViewState extends State<ClienteListView> {
               ),
             ),
 
-            // Lista de clientes da etapa selecionada.
+            const Padding(
+              padding: EdgeInsets.only(bottom: 4),
+              child: Text(
+                'Deslize para a direita: próxima etapa'
+                ' • para a esquerda: etapa anterior',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 11),
+              ),
+            ),
+
+            // Buscar clientes diretamente do Firestore.
             Expanded(
-              child: clientesFiltrados.isEmpty
-                  ? const Center(
-                      child: Text('Nenhum cliente nesta etapa.'),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(
-                        top: 4,
-                        bottom: 80,
+              child: StreamBuilder<List<ClienteModel>>(
+                stream: _controller.observarClientes(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          'Erro ao carregar clientes do Firebase:\n'
+                          '${snapshot.error}',
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      itemCount: clientesFiltrados.length,
-                      itemBuilder: (context, index) {
-                        final cliente = clientesFiltrados[index];
+                    );
+                  }
 
-                return Dismissible(key: ValueKey(cliente.id),
-                  direction: DismissDirection.horizontal,
-                  background: Container(
-                    alignment: Alignment.centerLeft,
-                    child: const Icon(Icons.arrow_right),
-                  ),
-                  secondaryBackground: Container(
-                    alignment: Alignment.centerRight,
-                    child: const Icon(Icons.arrow_left),
-                  ),
+                  if (snapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                  onDismissed: (direcao) {
-                    if (direcao == DismissDirection.startToEnd) {
-                      _controller.etapaSeguinte(cliente);
-                    }
-                    else {
-                      _controller.etapaAnterior(cliente);
-                    }
-                    setState(() {
-                    });
-                  },
-                  child: Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: cores.primaryContainer,
-                      foregroundColor: cores.onPrimaryContainer,
-                      child: const Icon(Icons.face, size: 22),
+                  final clientes =
+                      (snapshot.data ?? [])
+                          .where(
+                            (c) =>
+                                c.etapaFinanciamento ==
+                                _statusAtual,
+                          )
+                          .toList();
+
+                  if (clientes.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'Nenhum cliente nesta etapa.',
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.only(
+                      top: 4,
+                      bottom: 80,
                     ),
-                    title: Text(cliente.nome),
-                    subtitle: Text(cliente.email),
-                    trailing: Icon(
-                      Icons.chevron_right,
-                      color: cores.onSurfaceVariant,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ClienteView(cliente: cliente),
+                    itemCount: clientes.length,
+                    itemBuilder: (context, index) {
+                      final cliente = clientes[index];
+
+                      return Dismissible(
+                        key: ValueKey(cliente.id),
+                        direction: DismissDirection.horizontal,
+
+                        background: Container(
+                          color: Colors.green.withOpacity(.12),
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.only(
+                            left: 24,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward,
+                            color: Colors.green,
+                          ),
+                        ),
+
+                        secondaryBackground: Container(
+                          color: Colors.orange.withOpacity(.12),
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(
+                            right: 24,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.orange,
+                          ),
+                        ),
+
+                        confirmDismiss: (direction) =>
+                            _deslizarCliente(
+                          cliente,
+                          direction,
+                        ),
+
+                        child: Card(
+                          clipBehavior: Clip.antiAlias,
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor:
+                                  cores.primaryContainer,
+                              foregroundColor:
+                                  cores.onPrimaryContainer,
+                              child: const Icon(
+                                Icons.face,
+                                size: 22,
+                              ),
+                            ),
+                            title: Text(cliente.nome),
+                            subtitle: Text(cliente.email),
+                            trailing: Icon(
+                              Icons.chevron_right,
+                              color: cores.onSurfaceVariant,
+                            ),
+                            onTap: () =>
+                                _abrirCliente(cliente),
+                          ),
                         ),
                       );
                     },
-                  ),
-                )
-                );
-                
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

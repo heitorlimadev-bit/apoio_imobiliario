@@ -14,43 +14,31 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  // Controladores dos campos.
   final _loginController = TextEditingController();
   final _senhaController = TextEditingController();
 
-  // Controla o foco entre os campos.
-  final _senhaFocusNode = FocusNode();
-
-  // Controla a visibilidade da senha.
   bool _mostrarSenha = false;
-
-  // Controla o carregamento do botão.
   bool _carregando = false;
 
   @override
   void dispose() {
     _loginController.dispose();
     _senhaController.dispose();
-    _senhaFocusNode.dispose();
     super.dispose();
   }
 
-  // Autentica o usuário pelo Firebase.
   Future<void> _entrar() async {
     final email = _loginController.text.trim();
     final senha = _senhaController.text;
 
     if (email.isEmpty || senha.isEmpty) {
-      _mostrarMensagem('Preencha o e-mail e a senha.');
+      _mensagem('Preencha o e-mail e a senha.');
       return;
     }
 
-    setState(() {
-      _carregando = true;
-    });
+    setState(() => _carregando = true);
 
     try {
-      // O Firebase verifica as credenciais.
       await AuthService().login(
         email: email,
         senha: senha,
@@ -58,12 +46,12 @@ class _LoginViewState extends State<LoginView> {
 
       if (!mounted) return;
 
-      // Entra na lista somente após autenticação.
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => const ClienteListView(),
+          builder: (_) => const ClienteListView(),
         ),
+        (route) => false,
       );
     } on FirebaseAuthException catch (erro) {
       if (!mounted) return;
@@ -76,57 +64,36 @@ class _LoginViewState extends State<LoginView> {
         case 'user-not-found':
           mensagem = 'E-mail ou senha incorretos.';
           break;
-
         case 'invalid-email':
-          mensagem = 'Informe um endereço de e-mail válido.';
+          mensagem = 'E-mail inválido.';
           break;
-
         case 'user-disabled':
           mensagem = 'Esta conta foi desativada.';
           break;
-
         case 'too-many-requests':
           mensagem = 'Muitas tentativas. Tente novamente mais tarde.';
           break;
-
         case 'network-request-failed':
           mensagem = 'Verifique sua conexão com a internet.';
           break;
-
         default:
-          mensagem = 'Não foi possível entrar. Tente novamente.';
+          mensagem = 'Não foi possível entrar: ${erro.message ?? erro.code}';
       }
 
-      _mostrarMensagem(mensagem);
+      _mensagem(mensagem);
     } catch (erro) {
       if (!mounted) return;
-
-      _mostrarMensagem('Ocorreu um erro inesperado ao entrar.');
+      _mensagem('Erro ao acessar a conta: $erro');
     } finally {
       if (mounted) {
-        setState(() {
-          _carregando = false;
-        });
+        setState(() => _carregando = false);
       }
     }
   }
 
-  // Exibe mensagens na tela.
-  void _mostrarMensagem(String mensagem) {
+  void _mensagem(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-      ),
-    );
-  }
-
-  // Abre a tela de primeiro acesso.
-  void _abrirPrimeiroAcesso() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const PrimeiroAcessoView(),
-      ),
+      SnackBar(content: Text(mensagem)),
     );
   }
 
@@ -140,30 +107,28 @@ class _LoginViewState extends State<LoginView> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [cores.surface, cores.surfaceContainerLow],
-            stops: [0.0, 0.7],
+            colors: [
+              cores.surface,
+              cores.surfaceContainerLow,
+            ],
           ),
         ),
-
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Opacity(
-                    opacity: 1.0,
-                    child: Image.asset(
-                      'assets/images/SenhorCorretorLogoVerde.png',
-                      height: 150, //tamanho da img, largura acompanha proporção
-                    ),
+                  Image.asset(
+                    'assets/images/SenhorCorretorLogoVerde.png',
+                    height: 150,
                   ),
-                  const SizedBox(height: 28), //caixa p/ logo n ficar colada
+                  const SizedBox(height: 28),
+
                   Text(
-                    'Desbloquear o App',
+                    'Acesso do Corretor',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 22,
@@ -171,35 +136,69 @@ class _LoginViewState extends State<LoginView> {
                       color: cores.onSurface,
                     ),
                   ),
+
                   const SizedBox(height: 28),
+
                   TextField(
                     controller: _loginController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
-                      labelText: 'Login',
+                      labelText: 'E-mail',
                       prefixIcon: Icon(Icons.person_outline),
                     ),
                   ),
-                  const SizedBox(height: 14),
+
+                  const SizedBox(height: 16),
+
                   TextField(
                     controller: _senhaController,
-                    obscureText: true,
-                    style: const TextStyle(),
-                    decoration: const InputDecoration(
-                      labelText: 'Senha',
-                      prefixIcon: Icon(Icons.lock_outline),
+                    obscureText: !_mostrarSenha,
+                    onSubmitted: (_) => _entrar(),
+                    decoration: InputDecoration(
+                      labelText: 'Senha ',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _mostrarSenha
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _mostrarSenha = !_mostrarSenha;
+                          });
+                        },
+                      ),
                     ),
                   ),
+
                   const SizedBox(height: 28),
+
                   ElevatedButton(
+                    onPressed: _carregando ? null : _entrar,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                     ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('App desbloqueado!')),
-                      );
-                    },
-                    child: const Text('Entrar'),
+                    child: _carregando
+                        ? const CircularProgressIndicator()
+                        : const Text('Entrar'),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  TextButton(
+                    onPressed: _carregando
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    const PrimeiroAcessoView(),
+                              ),
+                            );
+                          },
+                    child: const Text('Primeiro acesso? Criar conta'),
                   ),
                 ],
               ),

@@ -1,3 +1,4 @@
+
 import 'package:apoio_imobiliario/features/imovel/imoveis_view.dart';
 import 'package:flutter/material.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_view.dart';
@@ -13,6 +14,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cores = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: Center(
         child: Builder(
@@ -20,87 +22,99 @@ class App extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
-              spacing: 10,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AppBar(title: const Center(child: Text('AppBar'))),
-                const Text('Botões debug do app', textAlign: TextAlign.center),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ClienteListView(),
-                      ),
-                    );
-                  },
-
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: cores.primary,
-                    foregroundColor: cores.onPrimary,
+                spacing: 10,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppBar(
+                    title: const Center(child: Text('AppBar')),
                   ),
-                  child: const Text('Debug Tela lista de Clientes'),
-                ),
 
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SplashView(),
-                      ),
-                    );
-                  },
-                  child: const Text('Debug Tela splash (placeholder)'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PrimeiroAcessoView(),
-                      ),
-                    );
-                  },
-                  child: const Text('Debug Tela Primeiro acesso'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ClienteView(cliente: clientesMock[1]),
-                      ),
-                    );
-                  },
-                  child: const Text('Debug Tela detalhes cliente'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginView(),
-                      ),
-                    );
-                  },
-                  child: const Text('Debug Tela de Login do Corretor'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ImoveisView(),
-                      ),
-                    );
-                  },
-                  child: const Text('Debug Tela Imóveis disponíveis'),
-                ),
-                //Basta substituir o SplashView() pelo widget que você quer testar
-              ],
-            ),
+                  const Text(
+                    'Botões debug do app',
+                    textAlign: TextAlign.center,
+                  ),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ClienteListView(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cores.primary,
+                      foregroundColor: cores.onPrimary,
+                    ),
+                    child: const Text('Debug Tela lista de Clientes'),
+                  ),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SplashView(),
+                        ),
+                      );
+                    },
+                    child: const Text('Debug Tela splash (placeholder)'),
+                  ),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PrimeiroAcessoView(),
+                        ),
+                      );
+                    },
+                    child: const Text('Debug Tela Primeiro acesso'),
+                  ),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ClienteView(cliente: clientesMock[1]),
+                        ),
+                      );
+                    },
+                    child: const Text('Debug Tela detalhes cliente'),
+                  ),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginView(),
+                        ),
+                      );
+                    },
+                    child: const Text('Debug Tela de Login do Corretor'),
+                  ),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ImoveisView(),
+                        ),
+                      );
+                    },
+                    child: const Text('Debug Tela Imóveis disponíveis'),
+                  ),
+
+                  // Basta substituir o SplashView() pelo widget
+                  // que você quer testar.
+                ],
+              ),
             );
           },
         ),

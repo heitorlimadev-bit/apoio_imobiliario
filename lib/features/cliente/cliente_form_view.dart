@@ -1,269 +1,410 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 
 import 'package:apoio_imobiliario/features/cliente/cliente_controller.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
+import 'package:apoio_imobiliario/features/cliente/selecionar_contato_view.dart';
 
 class ClienteFormView extends StatefulWidget {
   final ClienteController controller;
   final ClienteModel? cliente;
+  final EtapaFinanciamento etapaInicial;
 
   const ClienteFormView({
     super.key,
     required this.controller,
     this.cliente,
+    this.etapaInicial =
+        EtapaFinanciamento.montagemDePasta,
   });
 
   @override
-  State<ClienteFormView> createState() => _ClienteFormViewState();
+  State<ClienteFormView> createState() =>
+      _ClienteFormViewState();
 }
 
 class _ClienteFormViewState extends State<ClienteFormView> {
   final _formKey = GlobalKey<FormState>();
 
-  late final TextEditingController _nomeController;
-  late final TextEditingController _emailController;
-  late final TextEditingController _telefoneController;
-  late final TextEditingController _capitalController;
-  late final TextEditingController _cartaController;
+  late final TextEditingController _nome;
+  late final TextEditingController _email;
+  late final TextEditingController _telefone;
+  late final TextEditingController _capital;
+  late final TextEditingController _carta;
+
+  bool _salvando = false;
 
   bool get _editando => widget.cliente != null;
+
+  EtapaFinanciamento get _etapa =>
+      widget.cliente?.etapaFinanciamento ??
+      widget.etapaInicial;
 
   @override
   void initState() {
     super.initState();
 
-    final cliente = widget.cliente;
+    final c = widget.cliente;
 
-    _nomeController = TextEditingController(
-      text: cliente?.nome ?? '',
+    _nome = TextEditingController(text: c?.nome ?? '');
+    _email = TextEditingController(text: c?.email ?? '');
+    _telefone =
+        TextEditingController(text: c?.telefone ?? '');
+
+    _capital = TextEditingController(
+      text: c == null || c.capitalProprio == 0
+          ? ''
+          : '${c.capitalProprio}',
     );
 
-    _emailController = TextEditingController(
-      text: cliente?.email ?? '',
-    );
-
-    _telefoneController = TextEditingController(
-      text: cliente?.telefone ?? '',
-    );
-
-    _capitalController = TextEditingController(
-      text: cliente?.capitalProprio.toString() ?? '',
-    );
-
-    _cartaController = TextEditingController(
-      text: cliente?.cartaCredito.toString() ?? '',
+    _carta = TextEditingController(
+      text: c == null || c.cartaCredito == 0
+          ? ''
+          : '${c.cartaCredito}',
     );
   }
 
   @override
   void dispose() {
-    _nomeController.dispose();
-    _emailController.dispose();
-    _telefoneController.dispose();
-    _capitalController.dispose();
-    _cartaController.dispose();
+    _nome.dispose();
+    _email.dispose();
+    _telefone.dispose();
+    _capital.dispose();
+    _carta.dispose();
 
     super.dispose();
   }
 
-  // Valida os dados e salva o cliente.
-  void _salvar() {
-    if (!_formKey.currentState!.validate()) {
-      return;
+  String? _validarNome(String? v) {
+    if (v == null || v.trim().length < 3) {
+      return 'Informe um nome com pelo menos 3 caracteres.';
     }
 
-    final clienteAnterior = widget.cliente;
-
-    final cliente = ClienteModel(
-      id: clienteAnterior?.id ?? 0,
-      nome: _nomeController.text.trim(),
-      email: _emailController.text.trim(),
-      telefone: _telefoneController.text.trim(),
-      capitalProprio: int.parse(_capitalController.text),
-      cartaCredito: int.parse(_cartaController.text),
-      etapaFinanciamento: clienteAnterior?.etapaFinanciamento ??
-          EtapaFinanciamento.montagemDePasta,
-    );
-
-    final ClienteModel resultado;
-
-    if (_editando) {
-      widget.controller.atualizar(cliente);
-      resultado = cliente;
-    } else {
-      resultado = widget.controller.adicionar(cliente);
-    }
-
-    Navigator.pop(context, resultado);
+    return null;
   }
 
-  // Valida se o e-mail possui um formato básico válido.
-  String? _validarEmail(String? valor) {
-    if (valor == null || valor.trim().isEmpty) {
-      return 'Informe o e-mail.';
-    }
-
-    final emailValido = RegExp(
-      r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-    ).hasMatch(valor.trim());
-
-    if (!emailValido) {
+  String? _validarEmail(String? v) {
+    if (v == null ||
+        !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+            .hasMatch(v.trim())) {
       return 'Informe um e-mail válido.';
     }
 
     return null;
   }
 
-  // Valida campos numéricos.
-  String? _validarNumero(String? valor, String campo) {
-    if (valor == null || valor.trim().isEmpty) {
-      return 'Informe $campo.';
-    }
+  String? _validarTelefone(String? v) {
+    final n = (v ?? '').replaceAll(
+      RegExp(r'\D'),
+      '',
+    );
 
-    if (int.tryParse(valor) == null) {
-      return 'Informe um valor numérico válido.';
+    if (n.length < 10 || n.length > 13) {
+      return 'Informe um telefone válido com DDD.';
     }
 
     return null;
   }
 
+  String? _validarNumero(String? v, String campo) {
+    if (v == null || int.tryParse(v.trim()) == null) {
+      return 'Informe $campo válido.';
+    }
+
+    return null;
+  }
+
+  // Importar contato da agenda.
+  Future<void> _importarContato() async {
+    try {
+      final contato = await Navigator.push<Contact>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const SelecionarContatoView(),
+        ),
+      );
+
+      if (!mounted || contato == null) return;
+
+      setState(() {
+        _nome.text = contato.displayName ?? '';
+
+        if (contato.phones.isNotEmpty) {
+          _telefone.text = contato.phones.first.number;
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao importar contato: $e'),
+          ),
+        );
+      }
+    }
+  }
+
+  // Salvar no Firebase.
+  Future<void> _salvar() async {
+    if (_salvando ||
+        !_formKey.currentState!.validate()) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      _salvando = true;
+    });
+
+    try {
+      final anterior = widget.cliente;
+
+      final cliente = ClienteModel(
+        id: anterior?.id ?? '',
+        nome: _nome.text.trim(),
+        email: _email.text.trim(),
+        telefone: _telefone.text.trim(),
+        capitalProprio:
+            int.parse(_capital.text.trim()),
+        cartaCredito:
+            int.parse(_carta.text.trim()),
+        etapaFinanciamento: _etapa,
+      );
+
+      late final ClienteModel salvo;
+
+      if (_editando) {
+        await widget.controller.atualizar(cliente);
+        salvo = cliente;
+      } else {
+        salvo = await widget.controller.adicionar(cliente);
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _editando
+                ? 'Cliente atualizado no Firebase!'
+                : 'Cliente salvo no Firebase!',
+          ),
+        ),
+      );
+
+      Navigator.pop(context, salvo);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Não foi possível salvar no Firebase: $e',
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 8),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _salvando = false;
+        });
+      }
+    }
+  }
+
+  Widget _campo(
+    String titulo,
+    IconData icone,
+    TextEditingController c,
+    String? Function(String?) validar, {
+    TextInputType tipo = TextInputType.text,
+    List<TextInputFormatter>? formatters,
+    TextCapitalization capitalizacao =
+        TextCapitalization.none,
+  }) {
+    return TextFormField(
+      controller: c,
+      keyboardType: tipo,
+      inputFormatters: formatters,
+      textCapitalization: capitalizacao,
+      validator: validar,
+      decoration: InputDecoration(
+        labelText: titulo,
+        prefixIcon: Icon(icone),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           _editando ? 'Editar cliente' : 'Novo cliente',
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 500),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Icon(
-                    Icons.person_add_alt_1,
-                    size: 55,
-                  ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 500,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 10),
 
-                  const SizedBox(height: 16),
-
-                  Text(
-                    _editando ? 'Editar dados do cliente' : 'Cadastrar cliente',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // Nome.
-                  TextFormField(
-                    controller: _nomeController,
-                    textCapitalization: TextCapitalization.words,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Nome completo',
-                      prefixIcon: Icon(Icons.person_outline),
+                    Icon(
+                      _editando
+                          ? Icons.person_outline
+                          : Icons.person_add_alt_1,
+                      size: 55,
+                      color: tema.colorScheme.primary,
                     ),
-                    validator: (valor) {
-                      if (valor == null || valor.trim().isEmpty) {
-                        return 'Informe o nome do cliente.';
-                      }
 
-                      return null;
-                    },
-                  ),
+                    const SizedBox(height: 16),
 
-                  const SizedBox(height: 16),
-
-                  // E-mail.
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'E-mail',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    Text(
+                      _editando
+                          ? 'Editar dados do cliente'
+                          : 'Cadastrar cliente',
+                      textAlign: TextAlign.center,
+                      style: tema.textTheme.headlineSmall,
                     ),
-                    validator: _validarEmail,
-                  ),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                  // Telefone.
-                  TextFormField(
-                    controller: _telefoneController,
-                    keyboardType: TextInputType.phone,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Telefone',
-                      prefixIcon: Icon(Icons.phone_outlined),
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.timeline),
+                        title: const Text(
+                          'Etapa de financiamento',
+                        ),
+                        subtitle: Text(_etapa.rotulo),
+                      ),
                     ),
-                    validator: (valor) {
-                      if (valor == null || valor.trim().isEmpty) {
-                        return 'Informe o telefone.';
-                      }
 
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Capital próprio.
-                  TextFormField(
-                    controller: _capitalController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
+                    if (!_editando) ...[
+                      OutlinedButton.icon(
+                        onPressed: _importarContato,
+                        icon: const Icon(
+                          Icons.contacts_outlined,
+                        ),
+                        label: const Text(
+                          'Importar contato do celular',
+                        ),
+                      ),
+                      const SizedBox(height: 14),
                     ],
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Capital próprio (R\$)',
-                      prefixIcon: Icon(Icons.savings_outlined),
-                    ),
-                    validator: (valor) =>
-                        _validarNumero(valor, 'o capital próprio'),
-                  ),
 
-                  const SizedBox(height: 16),
-
-                  // Carta de crédito.
-                  TextFormField(
-                    controller: _cartaController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    textInputAction: TextInputAction.done,
-                    onFieldSubmitted: (_) => _salvar(),
-                    decoration: const InputDecoration(
-                      labelText: 'Carta de crédito (R\$)',
-                      prefixIcon: Icon(Icons.account_balance_outlined),
+                    _campo(
+                      'Nome completo',
+                      Icons.person_outline,
+                      _nome,
+                      _validarNome,
+                      capitalizacao:
+                          TextCapitalization.words,
                     ),
-                    validator: (valor) =>
-                        _validarNumero(valor, 'a carta de crédito'),
-                  ),
 
-                  const SizedBox(height: 28),
+                    const SizedBox(height: 16),
 
-                  FilledButton.icon(
-                    onPressed: _salvar,
-                    icon: Icon(
-                      _editando ? Icons.save_outlined : Icons.person_add,
+                    _campo(
+                      'E-mail',
+                      Icons.email_outlined,
+                      _email,
+                      _validarEmail,
+                      tipo: TextInputType.emailAddress,
                     ),
-                    label: Text(
-                      _editando ? 'Salvar alterações' : 'Cadastrar cliente',
+
+                    const SizedBox(height: 16),
+
+                    _campo(
+                      'Telefone',
+                      Icons.phone_outlined,
+                      _telefone,
+                      _validarTelefone,
+                      tipo: TextInputType.phone,
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 16),
+
+                    _campo(
+                      'Capital próprio (R\$)',
+                      Icons.savings_outlined,
+                      _capital,
+                      (v) => _validarNumero(
+                        v,
+                        'o capital próprio',
+                      ),
+                      tipo: TextInputType.number,
+                      formatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    _campo(
+                      'Carta de crédito (R\$)',
+                      Icons.account_balance_outlined,
+                      _carta,
+                      (v) => _validarNumero(
+                        v,
+                        'a carta de crédito',
+                      ),
+                      tipo: TextInputType.number,
+                      formatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    FilledButton.icon(
+                      onPressed:
+                          _salvando ? null : _salvar,
+                      icon: _salvando
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Icon(
+                              _editando
+                                  ? Icons.save_outlined
+                                  : Icons.person_add_alt_1,
+                            ),
+                      label: Text(
+                        _salvando
+                            ? 'Salvando...'
+                            : _editando
+                                ? 'Salvar alterações'
+                                : 'Cadastrar cliente',
+                      ),
+                      style: FilledButton.styleFrom(
+                        minimumSize:
+                            const Size(double.infinity, 52),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
