@@ -33,6 +33,8 @@ class ClienteController {
     return novoCliente;
   }
 
+  
+
   // Atualiza os dados de um cliente existente.
   void etapaSeguinte(ClienteModel cliente) {
     final etapaAtual = cliente.etapaFinanciamento;
@@ -46,5 +48,26 @@ class ClienteController {
     final clienteAtualizado = cliente.copyWith(etapaFinanciamento:etapaAtual.anterior);
     final posicao = _clientes.indexOf(cliente);
     _clientes[posicao] = clienteAtualizado;
+  }
+
+    void atualizar(ClienteModel clienteAtualizado) {
+    final posicao = _clientes.indexWhere(
+      (cliente) => cliente.id == clienteAtualizado.id,
+    );
+
+    if (posicao == -1) return;
+
+    _clientes[posicao] = clienteAtualizado;
+  }
+
+  // Busca um cliente pelo ID.
+  ClienteModel? buscarPorId(int id) {
+    for (final cliente in _clientes) {
+      if (cliente.id == id) {
+        return cliente;
+      }
+    }
+
+    return null;
   }
 }
