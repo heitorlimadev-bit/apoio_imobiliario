@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 
 import 'package:apoio_imobiliario/features/cliente/cliente_controller.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
-import 'package:apoio_imobiliario/features/cliente/selecionar_contato_view.dart';
 
 class ClienteFormView extends StatefulWidget {
   final ClienteController controller;
@@ -117,34 +115,6 @@ class _ClienteFormViewState extends State<ClienteFormView> {
   }
 
   // Importar contato da agenda.
-  Future<void> _importarContato() async {
-    try {
-      final contato = await Navigator.push<Contact>(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const SelecionarContatoView(),
-        ),
-      );
-
-      if (!mounted || contato == null) return;
-
-      setState(() {
-        _nome.text = contato.displayName ?? '';
-
-        if (contato.phones.isNotEmpty) {
-          _telefone.text = contato.phones.first.number;
-        }
-      });
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao importar contato: $e'),
-          ),
-        );
-      }
-    }
-  }
 
   // Salvar no Firebase.
   Future<void> _salvar() async {
@@ -299,18 +269,6 @@ class _ClienteFormViewState extends State<ClienteFormView> {
                       ),
                     ),
 
-                    if (!_editando) ...[
-                      OutlinedButton.icon(
-                        onPressed: _importarContato,
-                        icon: const Icon(
-                          Icons.contacts_outlined,
-                        ),
-                        label: const Text(
-                          'Importar contato do celular',
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                    ],
 
                     _campo(
                       'Nome completo',

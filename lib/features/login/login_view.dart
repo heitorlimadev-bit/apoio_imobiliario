@@ -155,7 +155,7 @@ class _LoginViewState extends State<LoginView> {
                     obscureText: !_mostrarSenha,
                     onSubmitted: (_) => _entrar(),
                     decoration: InputDecoration(
-                      labelText: 'Senha ',
+                      labelText: 'Senha',
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(

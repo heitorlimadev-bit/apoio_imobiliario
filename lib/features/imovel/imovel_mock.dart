@@ -3,7 +3,7 @@ import 'package:apoio_imobiliario/features/imovel/imovel_tipos_status.dart';
 
 final List<ImovelModel> imoveisMock = [
   ImovelModel(
-    id: 1,
+    id: 'mock-1',
     tipoImovel: TipoImovel.casa,
     descricaoImovel: 'Casa térrea para Locação',
     cidadeImovel: 'São José do Rio Preto - SP',
@@ -21,7 +21,7 @@ final List<ImovelModel> imoveisMock = [
     foto: 'assets/images/Casa2_1.jpg', // Deixando vazio para mostrar o ícone de fallback
   ),
   ImovelModel(
-    id: 2,
+    id: 'mock-2',
     tipoImovel: TipoImovel.apartamento,
     descricaoImovel: 'Apartamento moderno com sacada',
     cidadeImovel: 'São José do Rio Preto - SP',

@@ -1,584 +1,449 @@
-import 'package:apoio_imobiliario/features/imovel/imovel_tipos_status.dart';
-import 'package:flutter/material.dart'; // Biblioteca de componentes visuais
+import 'package:flutter/material.dart';
 
-import 'dart:io';
-
-import 'package:image_picker/image_picker.dart';
+import 'galeria_fotos_view.dart';
+import 'imovel_controller.dart';
+import 'imovel_model.dart';
+import 'imovel_tipos_status.dart';
 
 class CadastroImovel extends StatefulWidget {
-  // Widget que possui estado
-  const CadastroImovel({super.key});
+  final ImovelModel? imovel;
+
+  const CadastroImovel({
+    super.key,
+    this.imovel,
+  });
 
   @override
-  State<CadastroImovel> createState() => _CadastroImovelState(); // Cria o estado
+  State<CadastroImovel> createState() => _CadastroImovelState();
 }
 
 class _CadastroImovelState extends State<CadastroImovel> {
-  final _formKey = GlobalKey<FormState>(); // Identifica e controla o formulário
+  final _formKey = GlobalKey<FormState>();
+  final _controller = ImovelController();
 
-  TipoImovel? _tipoSelecionado;
-  final _descricaoController = TextEditingController(); // Controla campo título
-  final _cidadeController = TextEditingController();
-  final _ruaController = TextEditingController(); // Controla o campo valor
-  final _numeroController = TextEditingController(); //campo numero imovel
-  final _numeroApController = TextEditingController();
-  final _bairroImovelController = TextEditingController();
-  final _areaConstruidaController = TextEditingController();
-  final _qtDormitoriosController = TextEditingController();
-  final _qtBanheirosController = TextEditingController();
-  final _qtGaragensController = TextEditingController();
-  final _valorImovelController = TextEditingController();
-  StatusImovel? _statusSelecionado;
-  NegociacaoImovel? _interesseSelecionado;
-  File? _fotoSelecionada;
-  final ImagePicker _picker = ImagePicker();
+  final _descricao = TextEditingController();
+  final _cidade = TextEditingController();
+  final _rua = TextEditingController();
+  final _numero = TextEditingController();
+  final _numeroAp = TextEditingController();
+  final _bairro = TextEditingController();
+  final _area = TextEditingController();
+  final _dormitorios = TextEditingController();
+  final _banheiros = TextEditingController();
+  final _garagens = TextEditingController();
+  final _valor = TextEditingController();
+
+  TipoImovel? _tipo;
+  StatusImovel _status = StatusImovel.disponivel;
+  NegociacaoImovel _negociacao = NegociacaoImovel.venda;
+
+  /// Caminho da foto escolhida na galeria interna (assets/...).
+  String? _fotoSelecionada;
+
+  bool _carregando = false;
+
+  bool get _editando => widget.imovel != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final imovel = widget.imovel;
+
+    if (imovel != null) {
+      _tipo = imovel.tipoImovel;
+      _descricao.text = imovel.descricaoImovel;
+      _cidade.text = imovel.cidadeImovel;
+      _rua.text = imovel.ruaImovel;
+      _numero.text = imovel.numeroImovel.toString();
+      _numeroAp.text = imovel.numeroApImovel.toString();
+      _bairro.text = imovel.bairroImovel;
+      _area.text = imovel.areaConstruida.toString();
+      _dormitorios.text = imovel.qtDormitorios.toString();
+      _banheiros.text = imovel.qtBanheiros.toString();
+      _garagens.text = imovel.qtGaragens.toString();
+      _valor.text = imovel.valor.toString();
+      _status = imovel.statusImovel;
+      _negociacao = imovel.negociacaoImovel;
+      if (imovel.foto.isNotEmpty) {
+        _fotoSelecionada = imovel.foto;
+      }
+    }
+  }
 
   @override
   void dispose() {
-    // Executado quando a tela é destruída
-    _descricaoController.dispose(); // Libera o controller do título
-    _cidadeController.dispose();
-    _ruaController.dispose(); // Libera o controller do valor
-    _numeroController.dispose();
-    _numeroApController.dispose();
-    _bairroImovelController.dispose();
-    _areaConstruidaController.dispose();
-    _qtDormitoriosController.dispose();
-    _qtBanheirosController.dispose();
-    _qtGaragensController.dispose();
-    _valorImovelController.dispose();
-    super.dispose(); // Executa a limpeza da classe pai
+    _descricao.dispose();
+    _cidade.dispose();
+    _rua.dispose();
+    _numero.dispose();
+    _numeroAp.dispose();
+    _bairro.dispose();
+    _area.dispose();
+    _dormitorios.dispose();
+    _banheiros.dispose();
+    _garagens.dispose();
+    _valor.dispose();
+    super.dispose();
   }
 
-  void cadastrarImovel() {
-    // Função chamada pelo botão
-
-    if (_formKey.currentState!.validate()) {
-      // Verifica se todos os campos são válidos
-
-      String descricao = _descricaoController.text; // Captura o texto digitado
-      double valor = double.parse(
-        _ruaController.text,
-      ); // Converte texto em número decimal
-
-      debugPrint('Descrição: $descricao'); // Exibe o título no console
-      debugPrint('Valor: $valor'); // Exibe o valor no console
-    }
-  }
-
-  Future<void> _capturarImagem(ImageSource origem) async {
-    final XFile? imagem = await _picker.pickImage(
-      source: origem,
-      imageQuality: 80,
-    );
-
-    if (imagem != null) {
-      setState(() {
-        _fotoSelecionada = File(imagem.path);
-      });
-    }
-  }
-
-  void _mostrarOpcoesFoto() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+  Future<void> _abrirGaleria() async {
+    final caminho = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GaleriaFotosView(
+          fotoAtual: _fotoSelecionada,
+        ),
       ),
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Tirar foto com a Câmera'),
-                onTap: () {
-                  Navigator.pop(context); // Fecha o modal
-                  _capturarImagem(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Escolher da Galeria'),
-                onTap: () {
-                  Navigator.pop(context); // Fecha o modal
-                  _capturarImagem(ImageSource.gallery);
-                },
-              ),
-            ],
+    );
+
+    if (caminho == null || !mounted) return;
+
+    setState(() {
+      _fotoSelecionada = caminho;
+    });
+  }
+
+  String _texto(String campo) {
+    return campo.trim();
+  }
+
+  int _inteiro(TextEditingController campo) {
+    return int.tryParse(campo.text.trim()) ?? 0;
+  }
+
+  double _dinheiro(String texto) {
+    final normalizado = texto
+        .trim()
+        .replaceAll('R\$', '')
+        .replaceAll(' ', '')
+        .replaceAll('.', '')
+        .replaceAll(',', '.');
+
+    return double.parse(normalizado);
+  }
+
+  Future<void> _salvar() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_tipo == null) return;
+
+    setState(() => _carregando = true);
+
+    try {
+      final imovel = ImovelModel(
+        id: widget.imovel?.id ?? '',
+        tipoImovel: _tipo!,
+        descricaoImovel: _texto(_descricao.text),
+        cidadeImovel: _texto(_cidade.text),
+        ruaImovel: _texto(_rua.text),
+        numeroImovel: _inteiro(_numero),
+        numeroApImovel: _inteiro(_numeroAp),
+        bairroImovel: _texto(_bairro.text),
+        areaConstruida: _inteiro(_area),
+        qtDormitorios: _inteiro(_dormitorios),
+        qtBanheiros: _inteiro(_banheiros),
+        qtGaragens: _inteiro(_garagens),
+        valor: _dinheiro(_valor.text),
+        statusImovel: _status,
+        negociacaoImovel: _negociacao,
+        foto: _fotoSelecionada ?? '',
+      );
+
+      if (_editando) {
+        await _controller.atualizar(imovel);
+      } else {
+        await _controller.adicionar(imovel);
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _editando
+                ? 'Imóvel atualizado com sucesso!'
+                : 'Imóvel cadastrado com sucesso!',
           ),
-        );
-      },
+        ),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao salvar imóvel: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _carregando = false);
+      }
+    }
+  }
+
+  Widget _campo(
+    String titulo,
+    TextEditingController controller, {
+    bool numerico = false,
+    String? Function(String?)? validator,
+    int linhas = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: linhas,
+      keyboardType: numerico
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : TextInputType.text,
+      decoration: InputDecoration(
+        labelText: titulo,
+        border: const OutlineInputBorder(),
+      ),
+      validator: validator ??
+          (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Preencha este campo.';
+            }
+            return null;
+          },
     );
   }
+
+  Widget _espaco() => const SizedBox(height: 14);
 
   @override
   Widget build(BuildContext context) {
-    // Constrói a interface da tela
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      // Estrutura básica de uma tela Flutter
-
       appBar: AppBar(
-        title: const Text('Cadastrar imóvel'),
-        backgroundColor: Colors.transparent,
-      ),
-
-      body: Padding(
-        // Cria espaçamento interno
-        padding: const EdgeInsets.all(16),
-
-        child: SingleChildScrollView(
-          child: Form(
-            // Agrupa os campos do formulário
-            key: _formKey, // Associa o formulário à chave de controle
-
-            child: Column(
-              // Organiza os elementos verticalmente
-              children: [
-                //-------------------
-                const SizedBox(height: 16),
-                //------------------
-
-                // tipo de imovel (escolha)
-                DropdownButtonFormField<TipoImovel>(
-                  value: _tipoSelecionado,
-                  decoration: const InputDecoration(
-                    labelText: 'Tipo do imóvel',
-                    border: OutlineInputBorder(),
-                  ),
-                  hint: const Text('Selecione o tipo'),
-
-                  items: const [
-                    DropdownMenuItem(
-                      value: TipoImovel.apartamento,
-                      child: Text('Apartamento'),
-                    ),
-
-                    DropdownMenuItem(
-                      value: TipoImovel.casa,
-                      child: Text('Casa'),
-                    ),
-
-                    DropdownMenuItem(
-                      value: TipoImovel.terreno,
-                      child: Text('Terreno'),
-                    ),
-
-                    DropdownMenuItem(
-                      value: TipoImovel.salaComercial,
-                      child: Text('Sala'),
-                    ),
-
-                    DropdownMenuItem(
-                      value: TipoImovel.galpao,
-                      child: Text('Galpão'),
-                    ),
-                  ],
-
-                  onChanged: (TipoImovel? novoTipo) {
-                    setState(() {
-                      _tipoSelecionado = novoTipo;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Selecione o tipo do imóvel';
-                    }
-                    return null;
-                  },
-                ),
-
-                //------------------
-                const SizedBox(height: 16),
-                //------------------
-
-                //descrição imovel
-                TextFormField(
-                  // Primeiro campo de entrada
-                  controller:
-                      _descricaoController, // Vincula o campo ao controller
-                  decoration: const InputDecoration(
-                    labelText:
-                        'Descricao do imóvel', // Texto identificador do campo
-                    border: OutlineInputBorder(), // Desenha uma borda
-                  ),
-                  validator: (value) {
-                    // Função de validação
-                    if (value == null || value.isEmpty) {
-                      return 'Informe a descricao do imovel'; // Mensagem de erro
-                    }
-                    return null; // null significa que o campo é válido
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                //cidade imovel
-                TextFormField(
-                  controller: _cidadeController,
-                  decoration: const InputDecoration(
-                    labelText: 'Cidade do imóvel',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe a cidade';
-                    }
-                    return null;
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                //rua imovel
-                TextFormField(
-                  // Segundo campo de entrada
-                  controller: _ruaController,
-                  decoration: const InputDecoration(
-                    labelText: 'Valor do imóvel',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe o valor';
-                    }
-                    return null;
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                //numero imovel
-                TextFormField(
-                  // Segundo campo de entrada
-                  controller: _numeroController,
-                  keyboardType:
-                      TextInputType.number, // Solicita teclado numérico
-                  decoration: const InputDecoration(
-                    labelText: 'Número',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe o número do imovel';
-                    }
-                    if (int.tryParse(value) == null) {
-                      return 'Digite um número válido';
-                    }
-                    return null;
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                //numero apartamento (aparece só se for tipo apartamento)
-                if (_tipoSelecionado == TipoImovel.apartamento ||
-                    _tipoSelecionado == TipoImovel.salaComercial) ...[
-                  TextFormField(
-                    controller: _numeroApController,
-                    keyboardType:
-                        TextInputType.number, // Solicita teclado numérico
-                    decoration: const InputDecoration(
-                      labelText: 'Número do Apartamento',
-                      border: OutlineInputBorder(),
-                      hintText: 'Ex: 42',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Informe o número do apartamento';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Digite um número válido';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                //--------------------------
-
-                //bairro imovel
-                TextFormField(
-                  // Primeiro campo de entrada
-                  controller:
-                      _bairroImovelController, // Vincula o campo ao controller
-                  decoration: const InputDecoration(
-                    labelText:
-                        'Bairro do imóvel', // Texto identificador do campo
-                    border: OutlineInputBorder(), // Desenha uma borda
-                  ),
-                  validator: (value) {
-                    // Função de validação
-                    if (value == null || value.isEmpty) {
-                      return 'Informe a descricao do imovel'; // Mensagem de erro
-                    }
-                    return null; // null significa que o campo é válido
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                //Area construida
-                TextFormField(
-                  // Segundo campo de entrada
-                  controller: _areaConstruidaController,
-                  keyboardType:
-                      TextInputType.number, // Solicita teclado numérico
-                  decoration: const InputDecoration(
-                    labelText: 'area em m² construidos do imóvel',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe o valor';
-                    }
-                    return null;
-                  },
-                ),
-
-                //-----------------------
-                const SizedBox(height: 16),
-                //-----------------------
-
-                //qt dormitorios
-                TextFormField(                  
-                  controller: _qtDormitoriosController,
-                  keyboardType:
-                      TextInputType.number, // Solicita teclado numérico
-                  decoration: const InputDecoration(
-                    labelText: 'Quantidade dormitórios',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe a quantidade';
-                    }
-                    return null;
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                //qt banheiros
-                TextFormField(                  
-                  controller: _qtBanheirosController,
-                  keyboardType:
-                      TextInputType.number, // Solicita teclado numérico
-                  decoration: const InputDecoration(
-                    labelText: 'Quantidade de banheiros',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe a quantidade';
-                    }
-                    return null;
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                //qt garagens
-                TextFormField(
-                  // Segundo campo de entrada
-                  controller: _qtGaragensController,
-                  keyboardType:
-                      TextInputType.number, // Solicita teclado numérico
-                  decoration: const InputDecoration(
-                    labelText: 'quantidade de garagens',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe a quantidade';
-                    }
-                    return null;
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                //valor imovel
-                TextFormField(
-                  // Primeiro campo de entrada
-                  controller:
-                      _valorImovelController, // Vincula o campo ao controller
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText:
-                        'Valor do imóvel', // Texto identificador do campo
-                    border: OutlineInputBorder(), // Desenha uma borda
-                  ),
-                  validator: (value) {
-                    // Função de validação
-                    if (value == null || value.isEmpty) {
-                      return 'Informe o valor do imovel'; // Mensagem de erro
-                    }
-                    return null; // null significa que o campo é válido
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                // Negociação do imovel (escolha)
-                DropdownButtonFormField<NegociacaoImovel>(
-                  value: _interesseSelecionado,
-                  decoration: const InputDecoration(
-                    labelText: 'Interesse em negociar',
-                    border: OutlineInputBorder(),
-                  ),
-                  hint: const Text('Interesse em negócios'),
-
-                  items: const [
-                    DropdownMenuItem(
-                      value: NegociacaoImovel.aluguel,
-                      child: Text('Aluguel'),
-                    ),
-
-                    DropdownMenuItem(
-                      value: NegociacaoImovel.venda,
-                      child: Text('Venda'),
-                    ),
-
-                    DropdownMenuItem(
-                      value: NegociacaoImovel.troca,
-                      child: Text('Troca'),
-                    ),
-                  ],
-                  onChanged: (NegociacaoImovel? novoInteresse) {
-                    setState(() {
-                      _interesseSelecionado = novoInteresse;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Selecione o tipo do imóvel';
-                    }
-                    return null;
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                // Status do imovel (escolha)
-                DropdownButtonFormField<StatusImovel>(
-                  value: _statusSelecionado,
-                  decoration: const InputDecoration(
-                    labelText: 'Status do imóvel',
-                    border: OutlineInputBorder(),
-                  ),
-                  hint: const Text('Selecione o status'),
-
-                  items: const [
-                    DropdownMenuItem(
-                      value: StatusImovel.disponivel,
-                      child: Text('Disponível'),
-                    ),
-
-                    DropdownMenuItem(
-                      value: StatusImovel.vendido,
-                      child: Text('Vendido'),
-                    ),
-
-                    DropdownMenuItem(
-                      value: StatusImovel.alugado,
-                      child: Text('Terreno'),
-                    ),
-                  ],
-                  onChanged: (StatusImovel? novoStatus) {
-                    setState(() {
-                      _statusSelecionado = novoStatus;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Selecione o tipo do imóvel';
-                    }
-                    return null;
-                  },
-                ),
-
-                //-------------------------
-                const SizedBox(height: 16), // Espaçamento vertical
-                //-------------------------
-
-                // SELETOR VISUAL DE FOTO
-                InkWell(
-                  onTap: _mostrarOpcoesFoto,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    height: 180,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade400),
-                    ),
-                    child: _fotoSelecionada != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              _fotoSelecionada!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
-                          )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.camera_alt_outlined,
-                                size: 48,
-                                color: Colors.grey.shade700,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Toque para selecionar a foto do imóvel',
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ),
-
-                //--------------------------
-                const SizedBox(height: 20),
-                //--------------------------
-
-                ElevatedButton(
-                  // Botão de cadastro
-                  onPressed: cadastrarImovel, // Executa a função ao clicar
-                  child: const Text('Cadastrar'),
-                ),
-              ],
-            ),
-          ),
+        title: Text(
+          _editando ? 'Editar imóvel' : 'Cadastrar imóvel',
         ),
       ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            // Fotografia do imóvel (galeria interna).
+            InkWell(
+              onTap: _abrirGaleria,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                height: 210,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: _buildPreviewFoto(),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            OutlinedButton.icon(
+              onPressed: _abrirGaleria,
+              icon: const Icon(Icons.photo_library_outlined),
+              label: Text(
+                (_fotoSelecionada != null && _fotoSelecionada!.isNotEmpty)
+                    ? 'Trocar fotografia'
+                    : 'Adicionar fotografia',
+              ),
+            ),
+
+            _espaco(),
+
+            DropdownButtonFormField<TipoImovel>(
+              value: _tipo,
+              decoration: const InputDecoration(
+                labelText: 'Tipo do imóvel',
+                border: OutlineInputBorder(),
+              ),
+              items: TipoImovel.values.map((tipo) {
+                return DropdownMenuItem(
+                  value: tipo,
+                  child: Text(tipo.rotulo),
+                );
+              }).toList(),
+              onChanged: (value) => setState(() => _tipo = value),
+              validator: (value) =>
+                  value == null ? 'Selecione o tipo.' : null,
+            ),
+
+            _espaco(),
+
+            _campo('Descrição do imóvel', _descricao, linhas: 3),
+            _espaco(),
+
+            _campo('Cidade', _cidade),
+            _espaco(),
+
+            _campo('Rua / Avenida', _rua),
+            _espaco(),
+
+            _campo('Número do imóvel', _numero, numerico: true),
+            _espaco(),
+
+            _campo(
+              'Número do apartamento (se houver)',
+              _numeroAp,
+              numerico: true,
+              validator: (_) => null,
+            ),
+            _espaco(),
+
+            _campo('Bairro', _bairro),
+            _espaco(),
+
+            _campo('Área construída (m²)', _area, numerico: true),
+            _espaco(),
+
+            _campo('Quantidade de dormitórios', _dormitorios,
+                numerico: true),
+            _espaco(),
+
+            _campo('Quantidade de banheiros', _banheiros,
+                numerico: true),
+            _espaco(),
+
+            _campo('Quantidade de garagens', _garagens,
+                numerico: true),
+            _espaco(),
+
+            _campo(
+              'Valor do imóvel (ex.: 350.000,00)',
+              _valor,
+              numerico: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Informe o valor.';
+                }
+
+                try {
+                  if (_dinheiro(value) <= 0) {
+                    return 'Informe um valor maior que zero.';
+                  }
+                } catch (_) {
+                  return 'Informe um valor válido.';
+                }
+
+                return null;
+              },
+            ),
+
+            _espaco(),
+
+            DropdownButtonFormField<StatusImovel>(
+              value: _status,
+              decoration: const InputDecoration(
+                labelText: 'Status do imóvel',
+                border: OutlineInputBorder(),
+              ),
+              items: StatusImovel.values.map((status) {
+                return DropdownMenuItem(
+                  value: status,
+                  child: Text(status.rotulo),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _status = value);
+                }
+              },
+            ),
+
+            _espaco(),
+
+            DropdownButtonFormField<NegociacaoImovel>(
+              value: _negociacao,
+              decoration: const InputDecoration(
+                labelText: 'Tipo de negociação',
+                border: OutlineInputBorder(),
+              ),
+              items: NegociacaoImovel.values.map((negociacao) {
+                return DropdownMenuItem(
+                  value: negociacao,
+                  child: Text(negociacao.rotulo),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _negociacao = value);
+                }
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            ElevatedButton.icon(
+              onPressed: _carregando ? null : _salvar,
+              icon: _carregando
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.save),
+              label: Text(
+                _carregando
+                    ? 'Salvando...'
+                    : _editando
+                        ? 'Salvar alterações'
+                        : 'Cadastrar imóvel',
+              ),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _imagemPadrao() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.photo_library_outlined, size: 48),
+          SizedBox(height: 8),
+          Text('Toque para escolher na galeria'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewFoto() {
+    final foto = _fotoSelecionada ?? '';
+    if (foto.isEmpty) return _imagemPadrao();
+
+    final isNetwork =
+        foto.startsWith('http://') || foto.startsWith('https://');
+
+    if (isNetwork) {
+      return Image.network(
+        foto,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _imagemPadrao(),
+      );
+    }
+
+    return Image.asset(
+      foto,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _imagemPadrao(),
     );
   }
 }

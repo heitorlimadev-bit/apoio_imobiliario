@@ -7,28 +7,26 @@ import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_view.dart';
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
 
+import 'package:apoio_imobiliario/services/auth_service.dart';
+import 'package:apoio_imobiliario/features/login/login_view.dart';
+
+import 'package:apoio_imobiliario/features/cliente/importar_contatos_view.dart';
+
 class ClienteListView extends StatefulWidget {
   const ClienteListView({super.key});
 
   @override
-  State<ClienteListView> createState() =>
-      _ClienteListViewState();
+  State<ClienteListView> createState() => _ClienteListViewState();
 }
 
 IconData _iconeDaEtapa(EtapaFinanciamento etapa) {
   return switch (etapa) {
-    EtapaFinanciamento.montagemDePasta =>
-      Icons.folder_open,
-    EtapaFinanciamento.analiseDeCredito =>
-      Icons.manage_search,
-    EtapaFinanciamento.creditoAprovado =>
-      Icons.check_circle,
-    EtapaFinanciamento.creditoReprovado =>
-      Icons.cancel,
-    EtapaFinanciamento.engenharia =>
-      Icons.engineering,
-    EtapaFinanciamento.assinaturaDeContrato =>
-      Icons.draw,
+    EtapaFinanciamento.montagemDePasta => Icons.folder_open,
+    EtapaFinanciamento.analiseDeCredito => Icons.manage_search,
+    EtapaFinanciamento.creditoAprovado => Icons.check_circle,
+    EtapaFinanciamento.creditoReprovado => Icons.cancel,
+    EtapaFinanciamento.engenharia => Icons.engineering,
+    EtapaFinanciamento.assinaturaDeContrato => Icons.draw,
   };
 }
 
@@ -38,6 +36,19 @@ class _ClienteListViewState extends State<ClienteListView> {
   EtapaFinanciamento _statusAtual =
       EtapaFinanciamento.montagemDePasta;
 
+  Future<void> _importarDaAgenda() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ImportarContatosView(
+          controller: _controller,
+          etapaInicial: _statusAtual,
+        ),
+      ),
+    );
+  }
+
+  // Adicionar cliente.
   Future<void> _adicionarCliente() async {
     await Navigator.push(
       context,
@@ -50,6 +61,7 @@ class _ClienteListViewState extends State<ClienteListView> {
     );
   }
 
+  // Abrir detalhes do cliente.
   Future<void> _abrirCliente(ClienteModel cliente) async {
     await Navigator.push(
       context,
@@ -61,26 +73,72 @@ class _ClienteListViewState extends State<ClienteListView> {
       ),
     );
   }
+  Future<void> _deslogar() async {
+  final confirmar = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Sair da conta?'),
+      content: const Text(
+        'Deseja realmente sair para entrar com outra conta de corretor?',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Sair'),
+        ),
+      ],
+    ),
+  );
 
-  // Deslizar para a direita avança.
-  // Deslizar para a esquerda retorna.
+  if (confirmar != true || !mounted) return;
+
+  try {
+    await AuthService().logout();
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LoginView(),
+      ),
+      (route) => false,
+    );
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Erro ao sair da conta: $e'),
+      ),
+    );
+  }
+}
+  // Alterar etapa deslizando o cliente.
   Future<bool> _deslizarCliente(
     ClienteModel cliente,
     DismissDirection direcao,
   ) async {
-    final destino =
+    final EtapaFinanciamento? destino =
         direcao == DismissDirection.startToEnd
             ? cliente.etapaFinanciamento.seguinte
             : cliente.etapaFinanciamento.anterior;
 
-    if (destino == cliente.etapaFinanciamento) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Este cliente já está no limite das etapas nessa direção.',
+    // Verifica se existe uma próxima etapa.
+    if (destino == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Não existem mais etapas nessa direção.',
+            ),
           ),
-        ),
-      );
+        );
+      }
 
       return false;
     }
@@ -88,7 +146,7 @@ class _ClienteListViewState extends State<ClienteListView> {
     try {
       await _controller.alterarEtapa(cliente, destino);
 
-      if (!mounted) return true;
+      if (!mounted) return false;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -124,16 +182,50 @@ class _ClienteListViewState extends State<ClienteListView> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Apoio Imobiliário'),
+          actions: [
+            IconButton(
+              onPressed: _deslogar,
+              icon: const Icon(Icons.logout),
+              tooltip: 'Sair da conta',
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: _adicionarCliente,
+          onPressed: () async {
+            final opcao = await showModalBottomSheet<String>(
+              context: context,
+              builder: (context) => SafeArea(
+                child: Wrap(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.person_add),
+                      title: const Text('Cadastrar manualmente'),
+                      onTap: () => Navigator.pop(context, 'manual'),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.import_contacts),
+                      title: const Text('Importar da agenda'),
+                      onTap: () => Navigator.pop(context, 'agenda'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+
+            if (opcao == 'manual') {
+              await _adicionarCliente();
+            } else if (opcao == 'agenda') {
+              await _importarDaAgenda();
+            }
+          },
           tooltip: 'Adicionar cliente',
           child: const Icon(Icons.add),
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Botões para selecionar as etapas.
+            // Seleção das etapas.
             LayoutBuilder(
               builder: (context, limites) {
                 return SingleChildScrollView(
@@ -152,8 +244,7 @@ class _ClienteListViewState extends State<ClienteListView> {
                         for (final etapa
                             in EtapaFinanciamento.values)
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 4,
                             ),
                             child: ElevatedButton(
@@ -166,10 +257,8 @@ class _ClienteListViewState extends State<ClienteListView> {
                                     etapa == _statusAtual
                                         ? cores.onPrimary
                                         : cores.onSurfaceVariant,
-                                minimumSize:
-                                    const Size(52, 48),
-                                padding:
-                                    const EdgeInsets.symmetric(
+                                minimumSize: const Size(52, 48),
+                                padding: const EdgeInsets.symmetric(
                                   horizontal: 14,
                                 ),
                               ),
@@ -191,6 +280,7 @@ class _ClienteListViewState extends State<ClienteListView> {
               },
             ),
 
+            // Nome da etapa selecionada.
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 20,
@@ -219,7 +309,7 @@ class _ClienteListViewState extends State<ClienteListView> {
               ),
             ),
 
-            // Buscar clientes diretamente do Firestore.
+            // Clientes carregados do Firestore.
             Expanded(
               child: StreamBuilder<List<ClienteModel>>(
                 stream: _controller.observarClientes(),
@@ -244,14 +334,13 @@ class _ClienteListViewState extends State<ClienteListView> {
                     );
                   }
 
-                  final clientes =
-                      (snapshot.data ?? [])
-                          .where(
-                            (c) =>
-                                c.etapaFinanciamento ==
-                                _statusAtual,
-                          )
-                          .toList();
+                  final clientes = (snapshot.data ?? [])
+                      .where(
+                        (cliente) =>
+                            cliente.etapaFinanciamento ==
+                            _statusAtual,
+                      )
+                      .toList();
 
                   if (clientes.isEmpty) {
                     return const Center(
@@ -274,6 +363,7 @@ class _ClienteListViewState extends State<ClienteListView> {
                         key: ValueKey(cliente.id),
                         direction: DismissDirection.horizontal,
 
+                        // Fundo ao deslizar para a direita.
                         background: Container(
                           color: Colors.green.withOpacity(.12),
                           alignment: Alignment.centerLeft,
@@ -286,6 +376,7 @@ class _ClienteListViewState extends State<ClienteListView> {
                           ),
                         ),
 
+                        // Fundo ao deslizar para a esquerda.
                         secondaryBackground: Container(
                           color: Colors.orange.withOpacity(.12),
                           alignment: Alignment.centerRight,
@@ -323,8 +414,7 @@ class _ClienteListViewState extends State<ClienteListView> {
                               Icons.chevron_right,
                               color: cores.onSurfaceVariant,
                             ),
-                            onTap: () =>
-                                _abrirCliente(cliente),
+                            onTap: () => _abrirCliente(cliente),
                           ),
                         ),
                       );

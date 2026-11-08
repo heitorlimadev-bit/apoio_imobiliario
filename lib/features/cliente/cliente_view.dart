@@ -6,6 +6,8 @@ import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_controller.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_form_view.dart';
 
+import 'package:apoio_imobiliario/features/cliente/importar_contatos_view.dart';
+
 class ClienteView extends StatefulWidget {
   final ClienteModel cliente;
   final ClienteController? controller;
