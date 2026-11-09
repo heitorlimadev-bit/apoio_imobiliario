@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 
 import 'package:apoio_imobiliario/features/cliente/cliente_controller.dart';
@@ -222,7 +223,9 @@ class _ImportarContatosViewState extends State<ImportarContatosView> {
   Widget build(BuildContext context) {
     final filtrados = _filtrados;
 
-    return Scaffold(
+    return Fundopadrao(
+      conteudo: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Importar da agenda'),
         actions: [
@@ -290,7 +293,7 @@ class _ImportarContatosViewState extends State<ImportarContatosView> {
                             )
                           : ListView.separated(
                               itemCount: filtrados.length,
-                              separatorBuilder: (_, __) =>
+                              separatorBuilder: (_, _) =>
                                   const Divider(height: 1),
                               itemBuilder: (context, index) {
                                 final c = filtrados[index];
@@ -346,6 +349,7 @@ class _ImportarContatosViewState extends State<ImportarContatosView> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

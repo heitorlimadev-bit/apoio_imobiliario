@@ -1,6 +1,5 @@
-import 'package:apoio_imobiliario/features/imovel/imovel_tipos_status.dart';
 import 'package:flutter/material.dart';
-import 'package:apoio_imobiliario/features/imovel/imovel_model.dart'; // Ajuste o caminho
+import 'package:apoio_imobiliario/features/imovel/imovel_model.dart';
 
 class ImovelCard extends StatelessWidget {
   final ImovelModel imovel;
@@ -127,7 +126,7 @@ class ImovelCard extends StatelessWidget {
         height: 190,
         width: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildFundoSemFoto(cores),
+        errorBuilder: (_, _, _) => _buildFundoSemFoto(cores),
       );
     }
 
@@ -136,7 +135,7 @@ class ImovelCard extends StatelessWidget {
       height: 190,
       width: double.infinity,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => _buildFundoSemFoto(cores),
+      errorBuilder: (_, _, _) => _buildFundoSemFoto(cores),
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
         return Container(

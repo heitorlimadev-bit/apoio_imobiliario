@@ -1,8 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 
+import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
 import 'package:apoio_imobiliario/services/auth_service.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_list_view.dart';
 
@@ -63,12 +62,14 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
         ),
       );
 
-      // Encaminha para a lista de clientes.
-      Navigator.pushReplacement(
+      // Encaminha para a lista de clientes, limpando a pilha para que
+      // o botão voltar não retorne ao login com a conta já aberta.
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (context) => const ClienteListView(),
         ),
+        (route) => false,
       );
     } on FirebaseAuthException catch (erro) {
       if (!mounted) return;
@@ -125,7 +126,9 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Fundopadrao(
+      conteudo: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Primeiro acesso'),
       ),
@@ -284,6 +287,7 @@ class _PrimeiroAcessoViewState extends State<PrimeiroAcessoView> {
           ),
           ),
         ),
+      ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
 
 import 'imovel_imagens.dart';
 
@@ -49,7 +50,9 @@ class _GaleriaFotosViewState extends State<GaleriaFotosView> {
     final cores = Theme.of(context).colorScheme;
     final imagens = _imagensFiltradas;
 
-    return Scaffold(
+    return Fundopadrao(
+      conteudo: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Galeria de fotos'),
         actions: [
@@ -70,7 +73,7 @@ class _GaleriaFotosViewState extends State<GaleriaFotosView> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: _tipos.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final tipo = _tipos[index];
                 final ativo = tipo == _filtroTipo;
@@ -138,7 +141,7 @@ class _GaleriaFotosViewState extends State<GaleriaFotosView> {
                               Image.asset(
                                 caminho,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => ColoredBox(
+                                errorBuilder: (_, _, _) => ColoredBox(
                                   color: cores.surfaceContainerHighest,
                                   child: Icon(
                                     Icons.broken_image_outlined,
@@ -217,6 +220,7 @@ class _GaleriaFotosViewState extends State<GaleriaFotosView> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

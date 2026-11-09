@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Fundo padrão de todas as telas: cor de superfície do tema com a textura
+/// de doodles por cima. Use com um Scaffold de fundo transparente.
 class Fundopadrao extends StatelessWidget {
   final Widget conteudo;
   const Fundopadrao({super.key, required this.conteudo});
@@ -13,18 +15,12 @@ class Fundopadrao extends StatelessWidget {
       height: double.infinity,
       decoration: BoxDecoration(
         color: cores.surface,
-        //gradient: LinearGradient(
-        // begin: Alignment.topCenter,
-        // end: Alignment.bottomCenter,
-        //colors: [cores.primary, cores.secondary],
-        // stops: const [0.0, 0.4],
-        //),
-        image: const DecorationImage(
-          image: AssetImage('assets/images/DoodlePreto1.png'),
+        image: DecorationImage(
+          image: const AssetImage('assets/images/DoodlePreto1.png'),
           repeat: ImageRepeat.repeat,
           opacity: 0.1, // textura discreta
-          // Pinta os desenhos (originalmente pretos) com o verde do tema
-          colorFilter: ColorFilter.mode(Color.fromARGB(255, 31, 221, 104), BlendMode.srcIn),
+          // Pinta os desenhos (originalmente pretos) com o verde do tema.
+          colorFilter: ColorFilter.mode(cores.primary, BlendMode.srcIn),
         ),
       ),
       child: conteudo,

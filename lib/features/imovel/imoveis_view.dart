@@ -19,7 +19,15 @@ class _ImoveisViewState extends State<ImoveisView> {
   TipoImovel? _tipoFiltro;
   NegociacaoImovel? _negociacaoFiltro;
   StatusImovel? _statusFiltro;
+  int? _quartosMinimoFiltro; // ex.: 2 = "2 ou mais quartos"
   num? _valorMaximoFiltro;
+
+  bool get _temFiltroAtivo =>
+      _tipoFiltro != null ||
+      _negociacaoFiltro != null ||
+      _statusFiltro != null ||
+      _quartosMinimoFiltro != null ||
+      _valorMaximoFiltro != null;
 
   final _controller = ImovelController();
 
@@ -47,6 +55,11 @@ class _ImoveisViewState extends State<ImoveisView> {
       }
       //filtro por status (disponível, vendido, etc)
       if (_statusFiltro != null && imovel.statusImovel != _statusFiltro) {
+        return false;
+      }
+      //filtro por quantidade mínima de quartos
+      if (_quartosMinimoFiltro != null &&
+          imovel.qtDormitorios < _quartosMinimoFiltro!) {
         return false;
       }
       //filtro por teto de preço
@@ -130,7 +143,6 @@ class _ImoveisViewState extends State<ImoveisView> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Imóveis'),
-          backgroundColor: Colors.transparent,
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -223,10 +235,7 @@ class _ImoveisViewState extends State<ImoveisView> {
       child: Row(
         children: [
           // Botão Limpar (aparece apenas quando há algum filtro ativo)
-          if (_tipoFiltro != null ||
-              _negociacaoFiltro != null ||
-              _statusFiltro != null ||
-              _valorMaximoFiltro != null) ...[
+          if (_temFiltroAtivo) ...[
             ActionChip(
               avatar: const Icon(Icons.close, size: 16),
               label: const Text('Limpar'),
@@ -235,6 +244,7 @@ class _ImoveisViewState extends State<ImoveisView> {
                   _tipoFiltro = null;
                   _negociacaoFiltro = null;
                   _statusFiltro = null;
+                  _quartosMinimoFiltro = null;
                   _valorMaximoFiltro = null;
                 });
               },
@@ -242,53 +252,47 @@ class _ImoveisViewState extends State<ImoveisView> {
             const SizedBox(width: 8),
           ],
 
-          // Filtro por Aluguel
-          FilterChip(
-            label: const Text('Aluguel'),
-            selected: _negociacaoFiltro == NegociacaoImovel.aluguel,
-            onSelected: (selecionado) {
-              setState(() {
-                _negociacaoFiltro = selecionado
-                    ? NegociacaoImovel.aluguel
-                    : null;
-              });
-            },
+          // Negociação: Aluguel, Venda, Troca...
+          _filtroDropdown<NegociacaoImovel>(
+            titulo: 'Negociação',
+            icone: Icons.handshake_outlined,
+            opcoes: NegociacaoImovel.values,
+            selecionado: _negociacaoFiltro,
+            rotulo: (n) => n.rotulo,
+            aoSelecionar: (n) => setState(() => _negociacaoFiltro = n),
           ),
           const SizedBox(width: 8),
 
-          // Filtro por Venda
-          FilterChip(
-            label: const Text('Venda'),
-            selected: _negociacaoFiltro == NegociacaoImovel.venda,
-            onSelected: (selecionado) {
-              setState(() {
-                _negociacaoFiltro = selecionado ? NegociacaoImovel.venda : null;
-              });
-            },
+          // Tipo: Casa, Apartamento, Terreno...
+          _filtroDropdown<TipoImovel>(
+            titulo: 'Tipo',
+            icone: Icons.home_work_outlined,
+            opcoes: TipoImovel.values,
+            selecionado: _tipoFiltro,
+            rotulo: (t) => t.rotulo,
+            aoSelecionar: (t) => setState(() => _tipoFiltro = t),
           ),
           const SizedBox(width: 8),
 
-          // Filtro por Casas
-          FilterChip(
-            label: const Text('Casas'),
-            selected: _tipoFiltro == TipoImovel.casa,
-            onSelected: (selecionado) {
-              setState(() {
-                _tipoFiltro = selecionado ? TipoImovel.casa : null;
-              });
-            },
+          // Quartos: mínimo de dormitórios (1+, 2+, 3+, 4+)
+          _filtroDropdown<int>(
+            titulo: 'Quartos',
+            icone: Icons.bed_outlined,
+            opcoes: const [1, 2, 3, 4],
+            selecionado: _quartosMinimoFiltro,
+            rotulo: (q) => '$q+ quartos',
+            aoSelecionar: (q) => setState(() => _quartosMinimoFiltro = q),
           ),
           const SizedBox(width: 8),
 
-          // Filtro por Apartamentos
-          FilterChip(
-            label: const Text('Apartamentos'),
-            selected: _tipoFiltro == TipoImovel.apartamento,
-            onSelected: (selecionado) {
-              setState(() {
-                _tipoFiltro = selecionado ? TipoImovel.apartamento : null;
-              });
-            },
+          // Status: Disponível, Vendido, Alugado
+          _filtroDropdown<StatusImovel>(
+            titulo: 'Status',
+            icone: Icons.flag_outlined,
+            opcoes: StatusImovel.values,
+            selecionado: _statusFiltro,
+            rotulo: (s) => s.rotulo,
+            aoSelecionar: (s) => setState(() => _statusFiltro = s),
           ),
           const SizedBox(width: 8),
 
@@ -301,11 +305,62 @@ class _ImoveisViewState extends State<ImoveisView> {
                   : 'Até R\$ ${_valorMaximoFiltro!.toInt()}',
             ),
             backgroundColor: _valorMaximoFiltro != null
-                ? cores.secondaryContainer
+                ? cores.primaryContainer
                 : null,
             onPressed: () => _abrirDialogoValorMaximo(context),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Botão de filtro que, ao ser tocado, abre um menu com as opções.
+  ///
+  /// É genérico (`<T>`) para servir a qualquer lista de opções: enums
+  /// (tipo, negociação, status) ou números (quartos). A primeira opção do
+  /// menu, "Todos", remove o filtro. Quando há algo selecionado, o botão
+  /// mostra o valor escolhido e fica destacado.
+  Widget _filtroDropdown<T>({
+    required String titulo,
+    required IconData icone,
+    required List<T> opcoes,
+    required T? selecionado,
+    required String Function(T) rotulo,
+    required ValueChanged<T?> aoSelecionar,
+  }) {
+    final cores = Theme.of(context).colorScheme;
+    final ativo = selecionado != null;
+
+    // O menu trabalha com o índice da opção; -1 representa "Todos".
+    // (O PopupMenuButton ignora seleções com valor null, por isso o índice.)
+    return PopupMenuButton<int>(
+      tooltip: 'Filtrar por $titulo',
+      position: PopupMenuPosition.under,
+      onSelected: (indice) =>
+          aoSelecionar(indice < 0 ? null : opcoes[indice]),
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: -1,
+          child: Text('Todos (${titulo.toLowerCase()})'),
+        ),
+        const PopupMenuDivider(),
+        for (var i = 0; i < opcoes.length; i++)
+          CheckedPopupMenuItem(
+            value: i,
+            checked: opcoes[i] == selecionado,
+            child: Text(rotulo(opcoes[i])),
+          ),
+      ],
+      child: Chip(
+        avatar: Icon(icone, size: 16),
+        backgroundColor: ativo ? cores.primaryContainer : null,
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(ativo ? rotulo(selecionado as T) : titulo),
+            const Icon(Icons.arrow_drop_down, size: 18),
+          ],
+        ),
       ),
     );
   }

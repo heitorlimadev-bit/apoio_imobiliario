@@ -1,8 +1,7 @@
-
-import 'package:apoio_imobiliario/app.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
 import 'package:apoio_imobiliario/services/auth_service.dart';
 import 'package:apoio_imobiliario/features/login/primeiro_acesso_view.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_list_view.dart';
@@ -50,7 +49,7 @@ class _LoginViewState extends State<LoginView> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (_) => const App(),
+          builder: (_) => const ClienteListView(),
         ),
         (route) => false,
       );
@@ -102,19 +101,10 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     final cores = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              cores.surface,
-              cores.surfaceContainerLow,
-            ],
-          ),
-        ),
-        child: Center(
+    return Fundopadrao(
+      conteudo: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(

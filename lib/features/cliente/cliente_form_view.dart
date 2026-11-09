@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
 import 'package:flutter/services.dart';
 
 import 'package:apoio_imobiliario/features/cliente/cliente_controller.dart';
@@ -217,7 +218,9 @@ class _ClienteFormViewState extends State<ClienteFormView> {
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
 
-    return Scaffold(
+    return Fundopadrao(
+      conteudo: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(
           _editando ? 'Editar cliente' : 'Novo cliente',
@@ -367,6 +370,7 @@ class _ClienteFormViewState extends State<ClienteFormView> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

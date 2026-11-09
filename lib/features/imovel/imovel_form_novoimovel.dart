@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
 
 import 'galeria_fotos_view.dart';
 import 'imovel_controller.dart';
@@ -261,7 +262,9 @@ class _CadastroImovelState extends State<CadastroImovel> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Fundopadrao(
+      conteudo: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(
           _editando ? 'Editar imóvel' : 'Cadastrar imóvel',
@@ -316,7 +319,7 @@ class _CadastroImovelState extends State<CadastroImovel> {
             _espaco(),
 
             DropdownButtonFormField<TipoImovel>(
-              value: _tipo,
+              initialValue: _tipo,
               decoration: const InputDecoration(
                 labelText: 'Tipo do imóvel',
                 border: OutlineInputBorder(),
@@ -396,7 +399,7 @@ class _CadastroImovelState extends State<CadastroImovel> {
             _espaco(),
 
             DropdownButtonFormField<StatusImovel>(
-              value: _status,
+              initialValue: _status,
               decoration: const InputDecoration(
                 labelText: 'Status do imóvel',
                 border: OutlineInputBorder(),
@@ -417,7 +420,7 @@ class _CadastroImovelState extends State<CadastroImovel> {
             _espaco(),
 
             DropdownButtonFormField<NegociacaoImovel>(
-              value: _negociacao,
+              initialValue: _negociacao,
               decoration: const InputDecoration(
                 labelText: 'Tipo de negociação',
                 border: OutlineInputBorder(),
@@ -462,6 +465,7 @@ class _CadastroImovelState extends State<CadastroImovel> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -489,14 +493,14 @@ class _CadastroImovelState extends State<CadastroImovel> {
       return Image.network(
         foto,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _imagemPadrao(),
+        errorBuilder: (_, _, _) => _imagemPadrao(),
       );
     }
 
     return Image.asset(
       foto,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => _imagemPadrao(),
+      errorBuilder: (_, _, _) => _imagemPadrao(),
     );
   }
 }

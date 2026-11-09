@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -90,7 +89,6 @@ class AuthService {
       }, SetOptions(merge: true));
     }
   }
-//a
   // ATUALIZAR DADOS DO CORRETOR
   Future<void> atualizarDados({
     required String nome,

@@ -6,11 +6,10 @@ import 'package:apoio_imobiliario/features/cliente/cliente_form_view.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_model.dart';
 import 'package:apoio_imobiliario/features/cliente/cliente_view.dart';
 import 'package:apoio_imobiliario/features/cliente/etapa_financiamento.dart';
-
-import 'package:apoio_imobiliario/services/auth_service.dart';
-import 'package:apoio_imobiliario/features/login/login_view.dart';
-
 import 'package:apoio_imobiliario/features/cliente/importar_contatos_view.dart';
+import 'package:apoio_imobiliario/features/imovel/imoveis_view.dart';
+import 'package:apoio_imobiliario/features/login/login_view.dart';
+import 'package:apoio_imobiliario/services/auth_service.dart';
 
 class ClienteListView extends StatefulWidget {
   const ClienteListView({super.key});
@@ -35,6 +34,25 @@ class _ClienteListViewState extends State<ClienteListView> {
 
   EtapaFinanciamento _statusAtual =
       EtapaFinanciamento.montagemDePasta;
+
+  // Criado uma única vez: se ficasse no build, cada troca de etapa
+  // reabriria a escuta no Firestore e piscaria o carregamento.
+  late final Stream<List<ClienteModel>> _clientesStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _clientesStream = _controller.observarClientes();
+  }
+
+  Future<void> _abrirImoveis() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ImoveisView(),
+      ),
+    );
+  }
 
   Future<void> _importarDaAgenda() async {
     await Navigator.push(
@@ -73,51 +91,53 @@ class _ClienteListViewState extends State<ClienteListView> {
       ),
     );
   }
+
   Future<void> _deslogar() async {
-  final confirmar = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Sair da conta?'),
-      content: const Text(
-        'Deseja realmente sair para entrar com outra conta de corretor?',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancelar'),
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sair da conta?'),
+        content: const Text(
+          'Deseja realmente sair para entrar com outra conta de corretor?',
         ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Sair'),
-        ),
-      ],
-    ),
-  );
-
-  if (confirmar != true || !mounted) return;
-
-  try {
-    await AuthService().logout();
-
-    if (!mounted) return;
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const LoginView(),
-      ),
-      (route) => false,
-    );
-  } catch (e) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Erro ao sair da conta: $e'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sair'),
+          ),
+        ],
       ),
     );
+
+    if (confirmar != true || !mounted) return;
+
+    try {
+      await AuthService().logout();
+
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const LoginView(),
+        ),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao sair da conta: $e'),
+        ),
+      );
+    }
   }
-}
+
   // Alterar etapa deslizando o cliente.
   Future<bool> _deslizarCliente(
     ClienteModel cliente,
@@ -183,6 +203,11 @@ class _ClienteListViewState extends State<ClienteListView> {
         appBar: AppBar(
           title: const Text('Apoio Imobiliário'),
           actions: [
+            IconButton(
+              onPressed: _abrirImoveis,
+              icon: const Icon(Icons.home_work_outlined),
+              tooltip: 'Imóveis',
+            ),
             IconButton(
               onPressed: _deslogar,
               icon: const Icon(Icons.logout),
@@ -312,7 +337,7 @@ class _ClienteListViewState extends State<ClienteListView> {
             // Clientes carregados do Firestore.
             Expanded(
               child: StreamBuilder<List<ClienteModel>>(
-                stream: _controller.observarClientes(),
+                stream: _clientesStream,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return Center(
@@ -327,14 +352,13 @@ class _ClienteListViewState extends State<ClienteListView> {
                     );
                   }
 
-                  if (snapshot.connectionState ==
-                      ConnectionState.waiting) {
+                  if (!snapshot.hasData) {
                     return const Center(
                       child: CircularProgressIndicator(),
                     );
                   }
 
-                  final clientes = (snapshot.data ?? [])
+                  final clientes = snapshot.data!
                       .where(
                         (cliente) =>
                             cliente.etapaFinanciamento ==
@@ -365,7 +389,7 @@ class _ClienteListViewState extends State<ClienteListView> {
 
                         // Fundo ao deslizar para a direita.
                         background: Container(
-                          color: Colors.green.withOpacity(.12),
+                          color: Colors.green.withValues(alpha: .12),
                           alignment: Alignment.centerLeft,
                           padding: const EdgeInsets.only(
                             left: 24,
@@ -378,7 +402,7 @@ class _ClienteListViewState extends State<ClienteListView> {
 
                         // Fundo ao deslizar para a esquerda.
                         secondaryBackground: Container(
-                          color: Colors.orange.withOpacity(.12),
+                          color: Colors.orange.withValues(alpha: .12),
                           alignment: Alignment.centerRight,
                           padding: const EdgeInsets.only(
                             right: 24,
