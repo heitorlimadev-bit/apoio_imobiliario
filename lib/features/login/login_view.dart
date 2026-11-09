@@ -1,4 +1,5 @@
 
+import 'package:apoio_imobiliario/app.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -49,7 +50,7 @@ class _LoginViewState extends State<LoginView> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (_) => const ClienteListView(),
+          builder: (_) => const App(),
         ),
         (route) => false,
       );

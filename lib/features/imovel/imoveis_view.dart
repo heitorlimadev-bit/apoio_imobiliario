@@ -1,6 +1,5 @@
 import 'package:apoio_imobiliario/features/imovel/imovel_model.dart';
 import 'package:apoio_imobiliario/features/imovel/imovel_tipos_status.dart';
-
 import 'package:flutter/material.dart';
 
 import 'package:apoio_imobiliario/core/widgets/fundo_padrao.dart';
@@ -22,8 +21,21 @@ class _ImoveisViewState extends State<ImoveisView> {
   StatusImovel? _statusFiltro;
   num? _valorMaximoFiltro;
 
-  List<ImovelModel> get _imoveisFiltrados {
-    return imoveisMock.where((imovel) {
+  final _controller = ImovelController();
+
+  // O stream é criado uma única vez: recriá-lo a cada build (ex.: ao mudar
+  // um filtro) abriria uma nova escuta no Firestore e piscaria o loading.
+  late final Stream<List<ImovelModel>> _imoveisStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _imoveisStream = _controller.observarImoveis();
+  }
+
+  // Aplica os filtros localmente sobre a lista que veio do Firestore.
+  List<ImovelModel> _aplicarFiltros(List<ImovelModel> imoveis) {
+    return imoveis.where((imovel) {
       //Se o filtro de tipo estiver preenchido, validara correspondencia
       if (_tipoFiltro != null && imovel.tipoImovel != _tipoFiltro) {
         return false;
@@ -88,13 +100,6 @@ class _ImoveisViewState extends State<ImoveisView> {
     );
   }
 
-  @override
-  State<ImoveisView> createState() => _ImoveisViewState();
-}
-
-class _ImoveisViewState extends State<ImoveisView> {
-  final _controller = ImovelController();
-
   Future<void> _cadastrarImovel() async {
     await Navigator.push(
       context,
@@ -104,7 +109,7 @@ class _ImoveisViewState extends State<ImoveisView> {
     );
   }
 
-  Future<void> _editarImovel(imovel) async {
+  Future<void> _editarImovel(ImovelModel imovel) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -157,23 +162,53 @@ class _ImoveisViewState extends State<ImoveisView> {
 
             // Lista com rolagem ocupando o restante da tela
             Expanded(
-              child: _imoveisFiltrados.isEmpty
-                  ? Center(
+              child: StreamBuilder<List<ImovelModel>>(
+                stream: _imoveisStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    debugPrint('Erro ao carregar imóveis: ${snapshot.error}');
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          'Erro ao carregar imóveis.\n${snapshot.error}',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: cores.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final imoveis = _aplicarFiltros(snapshot.data!);
+                  if (imoveis.isEmpty) {
+                    return Center(
                       child: Text(
                         'Nenhum imóvel encontrado.',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: cores.onSurfaceVariant,
                         ),
                       ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(top: 4, bottom: 16),
-                      itemCount: _imoveisFiltrados.length,
-                      itemBuilder: (context, index) {
-                        final imovel = _imoveisFiltrados[index];
-                        return ImovelCard(imovel: imovel);
-                      },
-                    ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.only(top: 4, bottom: 16),
+                    itemCount: imoveis.length,
+                    itemBuilder: (context, index) {
+                      final imovel = imoveis[index];
+                      return ImovelCard(
+                        imovel: imovel,
+                        onEditar: () => _editarImovel(imovel),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),

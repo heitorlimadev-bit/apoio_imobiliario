@@ -116,6 +116,21 @@ class ImovelCard extends StatelessWidget {
       return _buildFundoSemFoto(cores);
     }
 
+    // Fotos da galeria interna são salvas como caminho de asset
+    // (assets/images/...); só URLs http(s) vêm da internet/Storage.
+    final isNetwork =
+        foto.startsWith('http://') || foto.startsWith('https://');
+
+    if (!isNetwork) {
+      return Image.asset(
+        foto,
+        height: 190,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildFundoSemFoto(cores),
+      );
+    }
+
     return Image.network(
       foto,
       height: 190,

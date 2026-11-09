@@ -33,7 +33,13 @@ class ImovelController {
 
   // Lista somente os imóveis do corretor autenticado.
   Stream<List<ImovelModel>> observarImoveis() {
-    final uid = _corretorId;
+    final uid = _auth.currentUser?.uid;
+
+    // Devolve o erro pelo próprio stream (em vez de lançar exceção
+    // síncrona no initState da tela), para o StreamBuilder exibi-lo.
+    if (uid == null) {
+      return Stream.error(StateError('Faça login para acessar os imóveis.'));
+    }
 
     return _imoveis
         .where('corretorId', isEqualTo: uid)
@@ -137,5 +143,18 @@ class ImovelController {
       'foto': fotoUrl,
       'atualizadoEm': FieldValue.serverTimestamp(),
     });
+  }
+
+  // Excluir imóvel.
+  Future<void> excluir(String imovelId) async {
+    final uid = _corretorId;
+    final documento = _imoveis.doc(imovelId);
+    final existente = await documento.get();
+
+    if (!existente.exists || existente.data()?['corretorId'] != uid) {
+      throw StateError('Você não tem permissão para excluir este imóvel.');
+    }
+
+    await documento.delete();
   }
 }

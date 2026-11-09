@@ -62,7 +62,9 @@ class _CadastroImovelState extends State<CadastroImovel> {
       _dormitorios.text = imovel.qtDormitorios.toString();
       _banheiros.text = imovel.qtBanheiros.toString();
       _garagens.text = imovel.qtGaragens.toString();
-      _valor.text = imovel.valor.toString();
+      // Formato brasileiro (350000,00): _dinheiro() remove pontos, então
+      // usar valor.toString() ("350000.0") multiplicaria o valor por 10.
+      _valor.text = imovel.valor.toStringAsFixed(2).replaceAll('.', ',');
       _status = imovel.statusImovel;
       _negociacao = imovel.negociacaoImovel;
       if (imovel.foto.isNotEmpty) {
@@ -185,6 +187,49 @@ class _CadastroImovelState extends State<CadastroImovel> {
     }
   }
 
+  Future<void> _excluir() async {
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir imóvel'),
+        content: const Text('Tem certeza? Esta ação não pode ser desfeita.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmado != true || !mounted) return;
+
+    setState(() => _carregando = true);
+
+    try {
+      await _controller.excluir(widget.imovel!.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Imóvel excluído.')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao excluir imóvel: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _carregando = false);
+    }
+  }
+
   Widget _campo(
     String titulo,
     TextEditingController controller, {
@@ -221,6 +266,14 @@ class _CadastroImovelState extends State<CadastroImovel> {
         title: Text(
           _editando ? 'Editar imóvel' : 'Cadastrar imóvel',
         ),
+        actions: [
+          if (_editando)
+            IconButton(
+              tooltip: 'Excluir imóvel',
+              onPressed: _carregando ? null : _excluir,
+              icon: const Icon(Icons.delete_outline),
+            ),
+        ],
       ),
       body: Form(
         key: _formKey,
